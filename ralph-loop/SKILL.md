@@ -1,174 +1,103 @@
+---
+name: ralph-loop
+description: Set up an orchestrated lead-agent + subagent loop for any iterative multi-step task. Use this skill whenever the user wants to process a collection of items one at a time (papers, files, tickets, data points), build up accumulated results across iterations, or run a multi-phase pipeline with a controlling agent and worker subagents. Also trigger on "ralph loop", "lead agent loop", "orchestration loop", "subagent delegation", processing a list of things automatically, or iterating over a batch of inputs. Trigger even when the user just describes the task without naming the pattern—if it sounds like "do X for each Y and accumulate results", this skill applies.
+---
+
 # Orchestrated Loop Skill
 
-## Purpose
+Help the user set up a **lead-agent + subagent** orchestration loop, then produce a ready-to-run `PROMPT.md`.
 
-Set up a **lead-agent + subagent** orchestration loop for any multi-step, iterative task. The lead agent owns the task queue and delegates work; subagents pick one unit of work, execute it, and exit. Compatible with the Ralph Loop plugin (`/ralph-loop`) or standalone use.
-
----
-
-## Core Pattern
-
-```
-Lead Agent (loop controller)
-  ├─ Maintains: progress.txt, shared state files
-  ├─ Spawns subagents via Task tool
-  ├─ Waits for each subagent to complete
-  └─ Repeats until all work is done or stop condition met
-
-Subagent (spawned per work unit)
-  ├─ Reads progress.txt → picks ONE unclaimed item
-  ├─ Claims it (marks in-progress) immediately to prevent double-work
-  ├─ Does the work, appends results to shared output files
-  ├─ Marks item done in progress.txt
-  └─ Exits
-```
+The lead agent owns the task queue and coordinates; subagents claim one unit of work, do it, and exit. This pattern works for any batch task: literature review, code refactoring, data extraction, ticket triage, etc.
 
 ---
 
-## When Invoked
+## Step 1 — Understand the task
 
-Do NOT immediately generate files. Run the elicitation protocol below first.
+Ask the user these questions (conversationally — don't dump them all at once, probe where answers are vague):
 
-### Step 1 — Elicit the task structure
+1. What is the overall goal in one sentence?
+2. What is one **work unit** — the smallest thing a subagent processes? (e.g., one paper, one file, one row)
+3. How are work units **discovered**? (files in a dir, lines in a file, API response, user-provided list?)
+4. What does a subagent **produce**? Where does it write output?
+5. Is there **cross-unit context** that accumulates? (running themes, totals, learned patterns that each subagent should read before starting)
+6. Are any phases **parallelizable**, or must units be processed in order?
+7. Are there **multiple subagent roles** (e.g., extract → plan → process → synthesize), or just one kind?
+8. What is the **stop condition**? (all items done, N iterations, explicit signal)
 
-Ask the user:
-
-1. **What is the task?** Describe the overall goal in one sentence.
-2. **What are the work units?** What is one "item" that a subagent processes? (e.g., one paper, one file, one ticket, one data point)
-3. **How are work units discovered?** Are they files in a directory, lines in a file, API calls, user-provided list?
-4. **What does a subagent produce?** What output does it write, and where?
-5. **Is there cross-unit state?** Is there accumulated context (themes, running totals, learned patterns) that each subagent should read from and append to?
-6. **What is the stop condition?** When is the loop done? (e.g., all items processed, N iterations, external signal)
-7. **Are any phases parallelizable?** Can multiple subagents run concurrently on different items, or must they run sequentially?
-8. **What subagent types are needed?** Is there one kind of subagent, or multiple specialized roles (e.g., extract → plan → process → synthesize)?
-
-Push back if answers are vague. A "work unit" must be atomic and independently executable.
+A work unit must be atomic — a subagent should be able to claim and finish it without needing to know about other units.
 
 ---
 
-### Step 2 — Design the orchestration
+## Step 2 — Design the orchestration
 
-Using the elicited answers, define:
+Using the answers, design:
 
-#### Shared State Files
+### Shared state files
 
-| File | Purpose | Access pattern |
-|------|---------|----------------|
-| `progress.txt` | One line per work unit; checkboxes track status | Lead reads; subagents claim + mark done |
-| `<output>.md` or `<output>.txt` | Accumulated subagent output | Subagents append only; never read |
-| `context.txt` (if cross-unit state needed) | Running insights/themes across units | Subagents read before work, append after |
+Three files cover most cases:
 
-**`progress.txt` format:**
+- **`progress.txt`** — one line per work unit, tracks claim status. Lead reads; subagents claim and mark done.
+- **`output.<ext>`** — accumulated subagent results. Subagents **append only**; never read.
+- **`context.txt`** — cross-unit insights (if needed). Subagents read before working, append after.
+
+`progress.txt` format:
 ```
-[ ] item_a   — unclaimed
-[~] item_b   — in-progress (claimed by a running subagent)
-[x] item_c   — done: <one-line note>
+[ ] item_a
+[~] item_b      ← claimed, in-progress
+[x] item_c — done: one-line note
 ```
 
-#### Lead Agent Steps
+The `[~]` claim step is critical: a subagent must mark an item in-progress *before* doing any work, not after. Without this, parallel subagents double-process the same item.
 
-1. **Init** (first run only): create state files from templates if they don't exist; populate `progress.txt` with all work units.
-2. **Check stop condition**: if all items are `[x]` and any final synthesis is done → output `<promise>LOOP COMPLETE</promise>` and stop.
-3. **Spawn subagents**: based on task design, either:
-   - Spawn one sequential subagent for the next unclaimed item, wait, repeat.
-   - Spawn N parallel subagents for unclaimed items (safe only if subagents don't read each other's output).
-   - Spawn a specialized subagent for the current phase (e.g., synthesis after all items done).
-4. **Handle failure**: if a subagent leaves an item stuck in `[~]` (in-progress but never completed), reset it to `[ ]` and retry or escalate to user.
+### Lead agent logic
 
-#### Subagent Steps (per work unit)
+1. **Init** (first run only): enumerate work units, write `progress.txt`, copy any templates.
+2. **Check stop**: if all `[x]` and any final phase is done → output `<promise>LOOP COMPLETE</promise>` and stop.
+3. **Spawn subagent(s)**: sequential (one next unclaimed item) or parallel (N unclaimed items), depending on whether units are independent.
+4. **Wait**. Repeat from step 2.
+5. **Failure recovery**: if an item is stuck in `[~]` across iterations, reset to `[ ]` or escalate to user.
+
+The lead agent does **no domain work** — all domain logic belongs in subagents.
+
+### Subagent logic (per work unit)
 
 1. Read `progress.txt` → find first `[ ]` item.
-2. **Immediately** mark it `[~]` (in-progress) before doing any work.
+2. Mark it `[~]` immediately.
 3. Read `context.txt` if cross-unit state is needed.
-4. Execute the work unit (call tools, process files, run commands, etc.).
-5. Append results to the designated output file(s). **Append only — never overwrite shared files.**
-6. Append to `context.txt` if new cross-unit insights were gained.
-7. Mark item `[x]` in `progress.txt` with a one-line note.
+4. Do the work (call tools, process files, run commands).
+5. Append results to output file(s). **Append only — never overwrite shared files.**
+6. Append to `context.txt` if new cross-unit insights gained.
+7. Mark `[x]` with a one-line note in `progress.txt`.
 8. Exit.
 
 ---
 
-### Step 3 — Generate the orchestration spec
+## Step 3 — Generate the PROMPT.md
 
-Produce a `PROMPT.md` (for use with `/ralph-loop`) or a standalone `SKILL.md` (for use as a skill) with the following sections filled in for the specific task:
+Confirm the design with the user, then write `PROMPT.md` for their specific task. Read `references/prompt-template.md` for the exact format to use — fill in every placeholder from the user's answers.
 
-```markdown
-# <Task Name> Loop
+Keep the generated file concrete: real filenames, real subagent names, real stop conditions. No placeholders in the output.
 
-## Shared Files
-- `progress.txt` — <description of work units tracked>
-- `<output file>` — <what is accumulated and how>
-- `context.txt` — <cross-unit state, if any>
+---
 
-## Lead Agent (loop controller)
+## Step 4 — Create initial state files
 
-### Initialization (first run only)
-- <How to discover/enumerate work units>
-- <How to populate progress.txt>
-- <Which template files to copy, if any>
+After writing `PROMPT.md`:
+1. Create `progress.txt` with all work units listed as `[ ]`.
+2. Create empty `context.txt` if cross-unit state is needed.
+3. Copy any template files the subagents will reference.
 
-### Loop Logic
-1. Check stop condition: <specific condition>
-2. Spawn <subagent type(s)>: <sequential or parallel, under what condition>
-3. Wait. Repeat.
-4. On completion: <final action, e.g., spawn synthesis subagent, write summary>
-5. Output `<promise>LOOP COMPLETE</promise>` and stop.
-
-### Failure Handling
-- If item stuck in `[~]` for more than one iteration: reset to `[ ]` or escalate.
-
-## Subagent: <Name> (spawned via Task tool, general/mode: subagent)
-
-### Inputs
-- Reads: `progress.txt`, `context.txt` (if applicable)
-
-### Work
-1. Claim next `[ ]` item → mark `[~]`
-2. <Domain-specific steps>
-3. Append results to `<output file>`
-4. Update `context.txt` if applicable
-5. Mark `[x]` in `progress.txt`
-
-## Stop Conditions
-- <Primary: all work units done>
-- <Secondary: explicit user cancellation, repeated subagent failures>
-
-## Output Writing Style
-- <Specify tone, format, notation conventions for the task domain>
+Provide the exact `/ralph-loop` invocation command:
+```
+/ralph-loop "<task description>. Output <promise>LOOP COMPLETE</promise> when done." --completion-promise "LOOP COMPLETE" --max-iterations <N>
 ```
 
 ---
 
-### Step 4 — Confirm and create files
+## Anti-patterns to avoid
 
-Present the design to the user:
-- The proposed shared files and their formats
-- The lead agent loop logic
-- Each subagent's role and access pattern
-- The stop condition
-
-Ask: *Does this capture the task correctly? Any edge cases (empty inputs, partial runs, retries)?*
-
-After confirmation:
-1. Create `progress.txt`, `context.txt`, and any template files if starting from scratch.
-2. Write the `PROMPT.md` or `SKILL.md` for the specific task.
-3. If using `/ralph-loop`, provide the exact invocation command.
-
----
-
-## Anti-Patterns to Avoid
-
-- **Subagents reading shared output files** — they should append only, never read what other subagents wrote (use `context.txt` for that).
-- **No claim step** — without marking `[~]` immediately, parallel subagents may process the same item twice.
-- **Lead agent doing domain work** — the lead only orchestrates; all domain-specific work belongs in subagents.
-- **Unbounded loops** — always define a concrete stop condition tied to `progress.txt` state.
-- **Monolithic subagents** — if a subagent's work can be split into phases (extract → analyze → write), consider separate subagent types.
-- **Overwriting shared files** — all subagent writes must be appends; only the synthesis phase (if any) may overwrite a designated output file.
-
----
-
-## Example Invocation (Ralph Loop)
-
-```
-/ralph-loop "Run the <task name> orchestration loop. Lead agent manages progress.txt and spawns subagents. Stop when all items are [x] and final output is written. Output <promise>LOOP COMPLETE</promise> when done." --completion-promise "LOOP COMPLETE" --max-iterations 50
-```
+- **No `[~]` claim step** — parallel subagents will race and double-process items.
+- **Subagents reading shared output** — they should append only; route cross-unit state through `context.txt`.
+- **Lead agent doing domain work** — it orchestrates; subagents work.
+- **No concrete stop condition** — always tie the stop to `progress.txt` state.
+- **Monolithic subagents** — if work has distinct phases (extract / analyze / synthesize), use separate subagent roles.
