@@ -50,6 +50,15 @@ Draft and revise in explicit passes. Do not draft linearly start-to-finish and t
 
 **Loop.** Repeat Phases 3–5 until the skim readback returns the intended takeaways without distortion and the deep check is clean. Two rounds are typical; one is suspicious. Then, per the user's global instruction, `git add`, commit, and push, ending commit messages with the project's `Co-Authored-By` trailer.
 
+### Rewriting existing text
+
+The common invocation is a rewrite, not a blank page. The same phases apply, entered in diagnostic order, and scaled to the size of the passage.
+
+- **Recover the takeaways first (Phase 0).** Take them from the user's request or `#Claude` comments when given. Otherwise infer what the passage is trying to leave with the reader, state that inference in one or two sentences, and confirm it before rewriting at length. A rewrite that polishes prose around the wrong takeaway is wasted work.
+- **Extract the existing skeleton before touching prose (Phase 1).** Read the headings and first sentences of the passage as the skimming reader would. Diagnose at this level: buried points, first sentences that carry context instead of claims, sections braiding two threads. Fix structure by reordering and promoting sentences before rewriting any of them. Most weak passages fail here, not at the sentence level.
+- **Rewrite surgically (Phase 2).** Keep sentences that already comply. Every changed line should trace to a diagnosed structural fault or a sentence-rule violation, not to taste. Match the density and idiom of the surrounding text that is not being rewritten.
+- **Scale the review to the scope.** For a paragraph or a few sentences, Phases 4–5 inline suffice; skip the subagent. For a section or more, run the full Phase 3 skim review with a fresh subagent, feeding it the post-rewrite skeleton. For edits inside a larger document, check the seams: the rewritten passage must still link backward from its first sentence and hand off cleanly to what follows.
+
 ## Voice
 
 - **Describe, do not convince.** Report what we did and what we observed. State the finding, then its cause. Avoid persuasive framing: "What sets X apart is...", "the key is...", "Importantly,", "Notably,", rhetorical questions, and setup-then-payoff contrasts ("not just X, but Y").
