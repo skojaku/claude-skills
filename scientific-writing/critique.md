@@ -7,7 +7,7 @@ The review passes of the drafting–review loop (workflow.md Phases 3–4), also
 Reconstruct what the satisficing reader sees, and check it against the takeaways.
 
 - Mechanically extract the skim view: headings, the first sentence of each paragraph (with one-sentence-per-line source layout this is the first line after each blank line or heading), figure captions, and bold text.
-- Give ONLY this extract to a fresh subagent (Agent tool, general-purpose, no other context) with a prompt like: "You are a busy reviewer who skimmed this document. State in your own words: what is being proposed, why it matters, what the evidence is, and what you remain unconvinced by. Do not guess charitably." The drafter cannot simulate naivety about its own draft; a context-free agent can.
+- Give ONLY this extract to a fresh subagent with no other context (spawned per the role-separation section of workflow.md) with a prompt like: "You are a busy reviewer who skimmed this document. State in your own words: what is being proposed, why it matters, what the evidence is, and what you remain unconvinced by. Do not guess charitably." The drafter cannot simulate naivety about its own draft; a context-free agent can.
 - Compare the subagent's readback to the takeaway list. Every takeaway the readback misses or distorts marks a paragraph whose first sentence is not doing its job, a missing entry-point repetition, or a buried section. Fix at the skeleton level, not by adding text.
 
 ## Adversarial review (does the argument survive attack?)
