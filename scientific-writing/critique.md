@@ -12,7 +12,7 @@ Reconstruct what the satisficing reader sees, and check it against the takeaways
 
 ## Adversarial review (does the argument survive attack?)
 
-Attack the argument the way a reviewer looking for a reason to decline would, and check that the text answers each attack. Skim review reads the skeleton as a naive reader; this reads the full passage as a hostile expert. Interrogate every load-bearing claim along these lines:
+Attack the argument the way a reviewer looking for a reason to decline would, and check that the text answers each attack. Skim review reads the skeleton as a naive reader; the adversarial review reads the full passage as a hostile expert. Interrogate every load-bearing claim along these lines:
 
 - **Operationalization gap.** A quantity defined one way and measured another. When the text defines a concept ("traversability, a property of shared conceptual frameworks") and later operationalizes it differently ("many researchers transition between the areas"), name the confounds the measurement admits but the definition excludes (job markets, funding, geography), and check the text concedes them and points to what rebuts them.
 - **Claim–evidence alignment.** Every cited number or result must support the specific claim, not merely share its topic. A statistic about redundant trials does not evidence a gap in tooling. Trace each citation to the exact assertion it sits under, and flag the ones that only relate to it.

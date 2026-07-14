@@ -28,7 +28,7 @@ Every rule in this skill derives from how a busy expert actually processes a lon
 
 ## Document structure
 
-- **The skeleton must stand alone.** Headings plus the first sentence of every paragraph, read in order with the figures, must deliver the complete argument. This is the document the skimming reader actually reads. Everything below the first sentence is elaboration for the reader who descends.
+- **The skeleton must stand alone.** Headings plus the first sentence of every paragraph, read in order with the figures, must deliver the complete argument. The skeleton is the document the skimming reader actually reads. Everything below the first sentence is elaboration for the reader who descends.
 - **Headings carry claims where the format allows.** "Mobility embeddings recover field structure without citation data" navigates and asserts. "Preliminary results" only navigates. In formats with fixed heading conventions, push the claim into a bold lead-in or the first sentence instead.
 - **Context, content, conclusion at every scale** (Mensh & Kording, *Ten Simple Rules for Structuring Papers*). The document opens with why and closes with what follows. Each section opens by placing itself in the argument and closes on what the reader should carry forward. Each paragraph opens with its point.
 - **One point per paragraph, point first.** The first sentence states the point in plain declarative form. The rest gives evidence and mechanism. If a paragraph needs two point sentences, it is two paragraphs. Never open a paragraph with throat-clearing context that defers the point to sentence three, because the satisficing reader is gone by then.

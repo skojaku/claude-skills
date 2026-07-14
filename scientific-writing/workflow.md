@@ -16,7 +16,7 @@ The orchestrator compares reviewer output against the takeaways, decides which f
 
 ## The phases
 
-**Phase 0 — Takeaways (orchestrator).** Before writing, list the 3–5 sentences the busy reader must still hold after putting the document down, plus one sentence per section. Write these down (a scratch file is fine). These are the acceptance criteria for every later review pass. If the user has stated the takeaways, use theirs; otherwise propose the list and confirm before drafting at length.
+**Phase 0 — Takeaways (orchestrator).** Before writing, list the 3–5 sentences the busy reader must still hold after putting the document down, plus one sentence per section. Write these sentences down (a scratch file is fine). The takeaway list is the acceptance criteria for every later review pass. If the user has stated the takeaways, use theirs; otherwise propose the list and confirm before drafting at length.
 
 **Phase 1 — Skeleton draft (orchestrator).** Write only the headings and the first sentence of every planned paragraph. Read this skeleton against the takeaway list. Fix ordering, missing steps, and buried claims here, where a change costs one line, not after paragraphs are built on top. Do not proceed until the skeleton alone tells the story.
 
@@ -24,7 +24,7 @@ The orchestrator compares reviewer output against the takeaways, decides which f
 
 **Phase 3 — Skim review (skim reader).** Run the skim review of critique.md: the orchestrator extracts the skim view, hands it to a fresh skim reader, compares the readback to the Phase 0 takeaways, and fixes misses at the skeleton level.
 
-**Phase 4 — Adversarial review and risk–return audit (critic).** Run the adversarial review of critique.md through a fresh critic on the full text, then the risk–return audit on every element the attack landed on. Phase 3 tests whether the reader gets the argument; this tests whether the argument survives someone trying to break it. The orchestrator folds every confirmed objection back into the Phase 0 takeaways as a claim the revision must now defend. When the audit says an element costs more criticism than it returns evidence, redirect its function instead of defending its prose, and flag redirects that change the design to the user before applying them.
+**Phase 4 — Adversarial review and risk–return audit (critic).** Run the adversarial review of critique.md through a fresh critic on the full text, then the risk–return audit on every element the attack landed on. Phase 3 tests whether the reader gets the argument; Phase 4 tests whether the argument survives someone trying to break it. The orchestrator folds every confirmed objection back into the Phase 0 takeaways as a claim the revision must now defend. When the audit says an element costs more criticism than it returns evidence, redirect its function instead of defending its prose, and flag redirects that change the design to the user before applying them.
 
 **Phase 5 — Deep review (orchestrator).** The writer already self-checked; the orchestrator spot-checks every touched sentence against the self-check list in style.md, since the writer grading its own homework is a weaker guarantee than a second reader.
 
