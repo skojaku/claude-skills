@@ -1,42 +1,43 @@
 # Workflow: the drafting–review loop
 
-The phased loop for drafting and rewriting, run by an orchestrator that delegates to role subagents. The reader model and document-structure rules in SKILL.md are assumed. Prose is written in the voice of style.md, and the review phases are specified in critique.md. Draft and revise in explicit passes; do not draft linearly start-to-finish and then polish. For a multi-section document, run the loop per section, then once over the whole document.
+Phased loop for drafting and rewriting, harness-agnostic. SKILL.md's reader model and structure rules are assumed; prose follows style.md; reviews follow critique.md. Draft in explicit passes, not linearly with a polish at the end. For a multi-section document, run the loop per section, then once over the whole document.
 
-## Role separation
+## Roles
 
-The session agent is the **orchestrator**. It owns the takeaways, the skeleton, all file edits, seam checks, decisions, user communication, and the commit. It does not draft section-scale prose and it does not review its own text, because a drafter is blind to its own draft. Three roles run as fresh subagents, spawned with whatever delegation mechanism the host harness provides (in Claude Code the Agent tool with a general-purpose agent, elsewhere a fresh session or sub-process). Each role starts fresh so no role sees another role's deliberation, and a mid-tier strong model suffices for the roles when the harness allows a model choice:
+Separate deciding, writing, and attacking. Where the environment can delegate (subagents, spawned agents, parallel sessions), give each role its own fresh agent. Where it cannot, run each role as a separate bounded pass with only that role's inputs in view, and state in the report that reviews were self-run — a drafter grading its own text is a weaker guarantee than an independent reader.
 
-- **Writer.** Receives SKILL.md, style.md, the approved skeleton, the takeaways, and the surrounding paragraphs for density matching. Expands the skeleton into prose (or rewrites a diagnosed passage surgically), self-checks against the style.md self-check list, and returns the text. The writer returns prose; it does not edit files.
-- **Skim reader.** Receives ONLY the skim extract, no skill files, no context, per critique.md. Its value is naivety; giving it anything else destroys the measurement.
-- **Critic.** Receives the full passage text and the adversarial checklist plus risk–return audit from critique.md, and nothing about how the text was drafted. Returns objections ranked by severity with the fix or redirect each one needs.
+- **Planner.** Owns takeaways, skeleton, attention-budget pass. Reads critic findings against the takeaways, decides which to act on, writes revision briefs (diagnosed faults, not rewritten sentences). Highest-judgment role; give it the strongest reasoning capacity available.
+- **Editor.** Expands the skeleton into prose or rewrites diagnosed passages surgically, self-checks against style.md's self-check list, and is the only role that writes files. Executes plans it did not set. Lightest sufficient capacity.
+- **Critics** (spawn fresh each round; their value is uncontaminated judgment):
+  - *Skim critic* (Phase 3) sees ONLY the skim extract — no skill files, no context. Naivety is the measurement; any extra context destroys it.
+  - *Adversarial critic* (Phase 4) sees the full passage plus the critique.md checklist, nothing about how the text was drafted.
+  - *Deep critic* (Phase 5) spot-checks every touched sentence against style.md's self-check list.
 
-The orchestrator compares reviewer output against the takeaways, decides which findings to act on, sends the writer a revision brief (the diagnosed faults, not rewritten sentences), and applies the returned text to the file. Send follow-up rounds to the same writer conversation where the harness supports continuing a subagent, so the writer keeps its context. Where it does not, include the prior draft and the new brief in a fresh writer prompt. Spawn reviewers fresh every round so their judgment stays uncontaminated.
+The coordinator (the session agent) owns user communication, sequencing, and the final commit; it does not draft prose or judge quality itself. Where continuing an agent's conversation is supported, send follow-ups there; otherwise include prior output in the new prompt.
 
-**No-subagent fallback.** When the host harness cannot spawn subagents at all, keep the role protocol and lose only the process isolation. Run each role as a separate, clearly bounded pass with only that role's inputs in view. For the skim pass, write the skim extract to a file and evaluate the extract alone, never the full text beside it. State in the report that the reviews were self-run, because a drafter reviewing its own text is a weaker guarantee than an independent reader.
+## Phases
 
-## The phases
+**0 — Takeaways (planner).** The 3–5 sentences the busy reader must retain, plus one per section. This list is the acceptance criteria for every review. If the user stated takeaways, use theirs; otherwise confirm the planner's list with the user before drafting at length.
 
-**Phase 0 — Takeaways (orchestrator).** Before writing, list the 3–5 sentences the busy reader must still hold after putting the document down, plus one sentence per section. Write these sentences down (a scratch file is fine). The takeaway list is the acceptance criteria for every later review pass. If the user has stated the takeaways, use theirs; otherwise propose the list and confirm before drafting at length.
+**1 — Skeleton (planner).** Headings and the first sentence of every planned paragraph. Fix ordering, missing steps, and buried claims here, where a change costs one line. Do not proceed until the skeleton alone tells the story.
 
-**Phase 1 — Skeleton draft (orchestrator).** Write only the headings and the first sentence of every planned paragraph. Read this skeleton against the takeaway list. Fix ordering, missing steps, and buried claims here, where a change costs one line, not after paragraphs are built on top. Do not proceed until the skeleton alone tells the story.
+**2 — Expand (editor).** Grow each skeleton sentence into its paragraph, point first, in style.md's voice, without demoting any skeleton sentence from first position. Coordinator checks the seams.
 
-**Phase 2 — Expand (writer).** Send the writer the skeleton, takeaways, and neighboring text. The writer grows each skeleton sentence into its paragraph, point first, in the voice of style.md, without demoting any skeleton sentence from first position. The orchestrator applies the returned prose and checks the seams.
+**3 — Skim review.** Per critique.md: extract the skim view, hand it alone to a fresh skim critic, compare readback to Phase 0 takeaways. Fix misses at the skeleton level, not by adding text.
 
-**Phase 3 — Skim review (skim reader).** Run the skim review of critique.md: the orchestrator extracts the skim view, hands it to a fresh skim reader, compares the readback to the Phase 0 takeaways, and fixes misses at the skeleton level.
+**4 — Adversarial review + risk–return audit.** Per critique.md on the full text. Fold every confirmed objection into the takeaways as a claim the revision must now defend. When the audit says an element costs more criticism than it returns evidence, redirect its function instead of defending its prose; flag design-changing redirects to the user before applying.
 
-**Phase 4 — Adversarial review and risk–return audit (critic).** Run the adversarial review of critique.md through a fresh critic on the full text, then the risk–return audit on every element the attack landed on. Phase 3 tests whether the reader gets the argument; Phase 4 tests whether the argument survives someone trying to break it. The orchestrator folds every confirmed objection back into the Phase 0 takeaways as a claim the revision must now defend. When the audit says an element costs more criticism than it returns evidence, redirect its function instead of defending its prose, and flag redirects that change the design to the user before applying them.
+**5 — Deep review.** Fresh deep critic spot-checks touched sentences against the style.md self-check list.
 
-**Phase 5 — Deep review (orchestrator).** The writer already self-checked; the orchestrator spot-checks every touched sentence against the self-check list in style.md, since the writer grading its own homework is a weaker guarantee than a second reader.
+**6 — Attention budget (planner).** Name each section's one thread in a sentence. Anything not serving it gets cut, demoted to a clause, or moved. Cut before adding.
 
-**Phase 6 — Attention budget (orchestrator).** Per section, name its one thread in a sentence. Anything in the section that does not serve that thread gets cut, demoted to a clause, or moved. Cut before adding. Drop preliminary numbers that are not load-bearing. Cuts go to the writer as a revision brief when they exceed clause-level surgery.
-
-**Loop.** Repeat Phases 3–6 until the skim readback returns the intended takeaways without distortion, the adversarial pass raises no unanswered objection, and the deep check is clean. Two rounds are typical; one is suspicious. Then the orchestrator commits and pushes per SKILL.md.
+**Loop.** Repeat 3–6 until the skim readback returns the takeaways undistorted, no unanswered objection remains, and the deep check is clean. Two rounds typical; one is suspicious. Then commit and push per SKILL.md.
 
 ## Rewriting existing text
 
-The common invocation is a rewrite, not a blank page. The same phases apply, entered in diagnostic order, and scaled to the size of the passage.
+The common invocation. Same phases, entered in diagnostic order, scaled to the passage.
 
-- **Recover the takeaways first (orchestrator, Phase 0).** Take them from the user's request or `#Claude` comments when given. Otherwise infer what the passage is trying to leave with the reader, state that inference in one or two sentences, and confirm it before rewriting at length. A rewrite that polishes prose around the wrong takeaway is wasted work.
-- **Extract the existing skeleton before touching prose (orchestrator, Phase 1).** Read the headings and first sentences of the passage as the skimming reader would. Diagnose at this level: buried points, first sentences that carry context instead of claims, sections braiding two threads. Fix structure by reordering and promoting sentences before rewriting any of them. Most weak passages fail here, not at the sentence level.
-- **Rewrite surgically (writer, Phase 2).** The revision brief to the writer lists the diagnosed faults and the sentences that already comply and must survive. Every changed line should trace to a diagnosed structural fault or a sentence-rule violation, not to taste. Match the density and idiom of the surrounding text that is not being rewritten.
-- **Scale the roles to the scope.** For a paragraph or a few sentences, the orchestrator works alone: it edits inline, applies the adversarial checks of critique.md to any claim the passage rests on, and runs Phases 5–6 itself, spawning no subagents. For a section or more, use the full role separation: writer for the rewrite, fresh skim reader on the post-rewrite skeleton, fresh critic on the full text. For edits inside a larger document, check the seams: the rewritten passage must still link backward from its first sentence and hand off cleanly to what follows.
+- **Recover takeaways first.** From the user's request or comments addressed to the assistant in the source. Otherwise infer the intended takeaway, state it in one or two sentences, and confirm before rewriting at length. Polishing prose around the wrong takeaway is wasted work.
+- **Extract the existing skeleton before touching prose.** Read headings and first sentences as the skimmer would. Diagnose at this level: buried points, first sentences carrying context instead of claims, sections braiding two threads. Reorder and promote before rewriting any sentence. Most weak passages fail here, not at the sentence level.
+- **Rewrite surgically.** The revision brief lists diagnosed faults and the sentences that already comply and must survive. Every changed line traces to a structural fault or a sentence-rule violation, not to taste. Match the density and idiom of surrounding untouched text.
+- **Scale roles to scope.** For a paragraph or a few sentences, the coordinator works alone: edit inline, apply critique.md's adversarial checks to load-bearing claims, run Phases 5–6 itself. For a section or more, use full role separation. For edits inside a larger document, check the seams: the rewritten passage must link backward from its first sentence and hand off cleanly.
