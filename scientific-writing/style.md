@@ -1,6 +1,6 @@
 # Style: voice, sentences, layout
 
-Sentence-scale rules encoding the user's voice. Apply from the first draft, not as a cleanup pass. SKILL.md's reader model and structure rules are assumed.
+Sentence-scale rules encoding the user's voice. Apply from the first draft, not as a cleanup pass. The writing-for-busy-readers skill's reader model and structure rules are assumed for paragraph-scale work.
 
 ## Voice
 
