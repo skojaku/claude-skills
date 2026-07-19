@@ -6,8 +6,18 @@ Sentence-scale rules encoding the user's voice. Apply from the first draft, not 
 
 - **Describe, do not convince.** Report what we did and what we observed. State the finding, then its cause. Avoid persuasive framing: "What sets X apart is...", "the key is...", "Importantly,", "Notably,", rhetorical questions, and setup-then-payoff contrasts ("not just X, but Y").
 - **First person "We".** "We find", "We attribute", "We use", "We instead use". Not impersonal "This follows", "Here we have", "It can be seen that".
-- **Formal, not bloggy.** This is a scientific paper. No conversational connectives, no hype adjectives ("powerful", "remarkable", "seamless"), no repeated buzzwords across nearby sentences.
+- **Formal, not bloggy.** This is a scientific paper or NSF-style research proposal. No conversational connectives, no hype adjectives ("powerful", "remarkable", "seamless"), no repeated buzzwords across nearby sentences.
 - **Cut emphasis filler, do not soften it.** Intensifiers that add emphasis but carry no information — "genuine", "genuinely", "truly", "actual", "actually", "really", "very", "highly", "key", "crucial", "critical", "essential", "fundamental", "significant", "significantly", "clearly", "simply" — should be deleted outright, not swapped for a milder word. "genuinely novel territory" -> "novel territory"; "the actual mechanism" -> "the mechanism". Keep such a word only when it draws a load-bearing contrast the sentence loses without it (realized traversability against topical similarity), and even then use it once in the passage, not on every nearby noun. A word that appears on three nearby nouns is overused whatever its meaning.
+- **NSF/scientific register, not product marketing.** Prose reports methods, measurements, releases, and contingencies. It does not pitch a platform, tour users through a map, or sound like release notes, an SRE runbook, or a startup roadmap. Prefer positive facts over slogan contrasts. Concrete substitutions:
+  - Product verbs out: "ships", "shipped", "shipping", "turns X into action", "puts X on the map", "unlocks", "empowers", "delivers the full stack". Prefer "released as", "implements", "the agent pathfinds and decodes", "disseminated through".
+  - Product packaging out: "tool suite", "software suite", "toolkit", "platform", "software ecosystem", "scientific computing stack", "notebook platform" as branding. Name the artifact once (e.g. CoAtlasTool) and then say "software" / "tools" / the specific component. List tools by role ("We use X for Y"), not as an ecosystem.
+  - Ops / SE jargon out of science body: "backend", "frontend", "API costs", "MCP integration", "production pipeline", "downstream component", "blank codebase", "degrade gracefully", "critical path", "FTE", "feature engineering", "on the fly", "batch process" as business packing, "unit-test coverage" as a scientific success headline, "go/no-go" only if a real gate, and then plain "stop/continue decision" is fine. Keep real technical nouns when they named the method (embedding, adapter, backbone, gravity potential, MCP as a protocol name, Snakemake pipeline in a DMP).
+  - Architecture dialect out of education/contingency prose: "base layer", "stretch layer", "demotes to", "re-gate", "failed-gate branch", "suggestion arm is dropped", "building end" / "navigating end", "needs no Git knowledge". State the contingency in plain English: if validation fails, the classroom mode shows the descriptive map only and withholds ordered next-concept suggestions.
+  - Marketing metaphor out: extended "travelers on the map" tours, "navigation layer to counteract convergence", "countermeasure to topical narrowing", "technology-transfer path to industry", "channels that temper adoption risk", "feasible now", "scarce step", "complete the III triplet", "interpretability a deliverable", "humans in control" as slogan. Prefer the concrete fact ("the human keeps final selection", "pilot assesses maps against industrial search needs").
+  - Soft app KPIs out: "users reporting enhanced understanding", "redesign the interface". Prefer "course participants report…", "revise materials or interaction design".
+  - Capability padding out: sentence-opening "This geometry enables…", "ensuring robust integration", "designed to", "aims agents at", "all served by the same underlying method" restated as platform pitch. State the mechanism or the measurement instead.
+  - Tagline stack out: a load-bearing contrast (e.g. movement records rather than paper text) may appear **once** as the definition. Do not restate the same "instead of retrieved documents" / "instead of topical similarity" pivot across the Summary, Intellectual Merit, Broader Impacts, and body. One strongest sentence per claim, adapted per section.
+  - Empty adverbs on a diet: "already", "actually", "directly", "in particular" often delete with no loss. Keep only when they carry a real time or scope contrast.
 
 ## Attention budget
 
@@ -48,7 +58,7 @@ Every additional fact, qualifier, or contrast splits the reader's attention acro
 
 ## Self-check list
 
-Before showing prose, check every touched sentence against: colons/semicolons (never), causal "..., so ..." (never), comma-coordinators beyond the earned few, nested relative/subordinate clauses (at most one or two per paragraph, never routine), bare demonstratives, "X, not Y" / "rather than" contrast count (near zero per section), emphasis-filler intensifiers (genuine, truly, actual, very, key, crucial, significant — delete, do not soften), apostrophe density, rhetorical filler, persuasive framing, repeated buzzwords, one sentence per source line, and the reader-stop test.
+Before showing prose, check every touched sentence against: colons/semicolons (never), causal "..., so ..." (never), comma-coordinators beyond the earned few, nested relative/subordinate clauses (at most one or two per paragraph, never routine), bare demonstratives, "X, not Y" / "rather than" / "instead of" contrast count (near zero per section; one load-bearing definition max per document), emphasis-filler intensifiers (genuine, truly, actual, very, key, crucial, significant — delete, do not soften), product/SE voice (ships, suite, backend, production pipeline, degrade gracefully, base/stretch layer, travelers metaphor, humans-in-control slogan, enables-openers — rewrite to method/measurement language), apostrophe density, rhetorical filler, persuasive framing, repeated buzzwords and tagline stacks, one sentence per source line, and the reader-stop test.
 
 ## Quick contrast
 
@@ -57,6 +67,12 @@ Blog-like (avoid):
 
 In style (use):
 > Doc2LoRA embeddings form a smooth semantic space. Averaging a set of papers moves the embedding toward the concept those papers share. ICAE decodes constructed points. Its embeddings occupy a narrow cone. Averages over them remain as specific as a single paper.
+
+Product / SE voice (avoid):
+> The tool suite ships as an MCP server. An AI agent turns the landscape into action, putting travelers on the map and ensuring robust integration with educational workflows. The base layer ships regardless; on failure the classroom deployment demotes and the suggestion arm is dropped.
+
+NSF descriptive voice (use):
+> CoAtlasTool is released as open-source software and exposes pathfinding and decoding through an MCP server. The agent traces a path from the researcher's recent papers toward a knowledge hole, decodes waypoints into guiding questions, and leaves final selection to the human. If the Year-1 curricular validation fails, classroom mode shows the descriptive map only and withholds ordered next-concept suggestions.
 
 Fragmented, fails the reader-stop test (avoid):
 > The relevant information is present in the embedding. Cosine similarity and naive Euclidean distance do not expose it. A learnable bijective transform reshapes the geometry to surface it. We train this transform on a small set of citation pairs.
