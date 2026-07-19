@@ -43,7 +43,7 @@ Every added fact, qualifier, or contrast splits reader attention at the cost of 
 
 ## Source layout
 
-- **One sentence per line.** Line break after each sentence-ending period; no hard-wrapping a sentence across lines, no two sentences on one line. Blank line between paragraphs. Keeps diffs, line-based editing, and the critique.md skim extraction mechanical. Source layout only; rendering unchanged.
+- **One sentence per line.** Line break after each sentence-ending period; no hard-wrapping a sentence across lines, no two sentences on one line. Blank line between paragraphs. Keeps diffs, line-based editing, and the skim extraction mechanical. Source layout only; rendering unchanged.
 
 ## Reference and precision
 
