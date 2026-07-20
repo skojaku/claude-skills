@@ -1,6 +1,6 @@
 ---
 name: writing-for-busy-readers
-description: Structure, draft, and review long-form text (reports, docs, papers, proposals) for busy readers who skim. Skeleton-first drafting loop with a skim-reader review pass and an adversarial claim-and-evidence review pass. Usable standalone or as the foundation another skill (e.g. scientific-writing) builds domain-specific voice and review on top of.
+description: Structure, draft, and review long-form text (reports, docs, papers, proposals) for busy readers who skim. Skeleton-first drafting loop with a skim-reader review pass and an adversarial claim-and-evidence review pass. Usable standalone or as the foundation other skills (e.g. scientific-writing, scientific-review) build domain-specific voice and review on top of.
 ---
 
 # Writing for Busy Readers

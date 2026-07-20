@@ -1,20 +1,19 @@
 ---
 name: scientific-writing
-description: Draft and revise multi-page scientific documents (papers, grant proposals) in the user's style. Structures documents for busy readers who skim, using a skeleton-first drafting loop with skim-reader and adversarial claim-and-evidence review passes. Also enforces the user's sentence-level voice (terse first-person description over persuasive, blog-like phrasing). Use whenever writing, rewriting, or reviewing paper or proposal prose, even for a single paragraph.
+description: Draft and revise multi-page scientific documents (papers, grant proposals) in the user's style. Structures documents for busy readers who skim, using a skeleton-first drafting loop, and enforces the user's sentence-level voice (terse first-person description over persuasive, blog-like phrasing). Use whenever writing, rewriting, or editing paper or proposal prose, even for a single sentence. For a review or critique request without editing, use the scientific-review skill instead.
 ---
 
 # Scientific Writing
 
-This skill overlays the user's personal voice and grant-specific review on top of the writing-for-busy-readers skill, which supplies the reader model, document structure rules, and the drafting/review workflow.
+This skill overlays the user's personal voice on top of the writing-for-busy-readers skill, which supplies the reader model, document structure rules, and the drafting workflow. Reviewing is not this skill's job — the scientific-review skill owns the review pipeline.
 
 - **`style.md`** — voice, sentence rules, layout, examples. Read before writing or editing ANY prose, down to one sentence.
-- **`review-grant.md`** — risk–return audit for grant/proposal design elements. Read after the adversarial review pass.
 
 ## Routing
 
-- Any prose edit, however short -> read `style.md` first.
-- Drafting or rewriting a paragraph or more -> load the writing-for-busy-readers skill (invoke it by name through the environment's skill mechanism where available; otherwise read `../writing-for-busy-readers/SKILL.md` — the two skills are installed side by side) and follow its workflow.
-- A review request -> run writing-for-busy-readers' `review.md`, then this skill's `review-grant.md`. Start the adversarial critic from writing-for-busy-readers' `agents/adversarial-critic.md`. Start the style deep-check from this skill's `agents/style-critic.md`.
+- A wording or sentence-level edit -> read `style.md`, make the edit, run its self-check list. No review passes.
+- Drafting or rewriting a paragraph or more -> load the writing-for-busy-readers skill (invoke it by name through the environment's skill mechanism where available; otherwise read `../writing-for-busy-readers/SKILL.md` — the skills are installed side by side) and follow its workflow. Where its review phases ask for the invoking skill's further audit or deep critic, use the scientific-review skill's `review-grant.md` and `agents/style-critic.md`.
+- A review request without editing -> switch to the scientific-review skill.
 
 ## After editing
 
@@ -22,4 +21,4 @@ After editing a document file: `git add`, commit, push. End commit messages with
 
 ## Reporting to the user
 
-Report to the user in Japanese after any edit or review-only pass: what you diagnosed, what changed (or was found) and why, and what you deliberately left alone. Do not translate the document's own prose.
+Report to the user in Japanese after any edit: what you diagnosed, what changed and why, and what you deliberately left alone. Do not translate the document's own prose.

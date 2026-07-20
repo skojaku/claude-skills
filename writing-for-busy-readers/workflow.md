@@ -22,7 +22,7 @@ The coordinator (the session agent) owns user communication, sequencing, and the
 
 **3 — Skim review.** Run review.md's skim review.
 
-**4 — Adversarial review.** Run review.md's adversarial review. If the invoking skill defines a further audit on top (e.g. scientific-writing's review-grant.md), run it here too.
+**4 — Adversarial review.** Run review.md's adversarial review. If a companion skill defines a further audit on top (e.g. scientific-review's review-grant.md for grant documents), run it here too.
 
 **5 — Deep review.** Fresh deep critic spot-checks touched sentences against the invoking skill's sentence-level self-check list.
 
