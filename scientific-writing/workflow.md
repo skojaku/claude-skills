@@ -1,40 +1,40 @@
 # Workflow: the drafting–review loop
 
-Phased loop for drafting and rewriting, harness-agnostic. SKILL.md's reader model and structure rules are assumed; the review phases start their critics from the scientific-review skill's `agents/` directory (side-by-side install: `../scientific-review/agents/`). Draft in explicit passes, not linearly with a polish at the end. For a multi-section document, run the loop per section, then once over the whole document.
+Phased loop, harness-agnostic. SKILL.md's reader model and structure rules assumed; critics come from `../scientific-review/agents/`. Draft in explicit passes, not linearly with a polish at the end. Multi-section document: loop per section, then once over the whole document.
 
 ## Roles
 
-Separate deciding, writing, and attacking. Where the environment can delegate (subagents, spawned agents, parallel sessions), give each role its own fresh agent. Where it cannot, run each role as a separate bounded pass with only that role's inputs in view, and state in the report that reviews were self-run — a drafter grading its own text is a weaker guarantee than an independent reader.
+Separate deciding, writing, attacking. Fresh subagent per role where the environment allows; else run each role as a bounded pass seeing only that role's inputs, and disclose in the report that reviews were self-run.
 
-- **Planner.** Owns takeaways, skeleton, attention-budget pass. Reads critic findings against the takeaways, decides which to act on, writes revision briefs (diagnosed faults, not rewritten sentences). Highest-judgment role; give it the strongest reasoning capacity available (Opus-tier).
-- **Editor.** Expands the skeleton into prose or rewrites diagnosed passages surgically, self-checks against `style.md`'s self-check list, and is the only role that writes files. Executes plans it did not set. Lightest sufficient capacity (Sonnet-tier; Haiku for pure wording fixes).
-- **Critics.** Spawn fresh each round; their value is uncontaminated judgment. Invoked from the scientific-review skill's `agents/` directory. Input contract is self-described in each agent file — do not hand a critic anything beyond what its file specifies.
+- **Planner** (Opus-tier). Owns takeaways, skeleton, attention budget. Reads critic findings against the takeaways, decides which to act on, writes revision briefs — diagnosed faults, not rewritten sentences.
+- **Editor** (Sonnet-tier; Haiku for pure wording). Expands skeleton into prose or rewrites diagnosed passages surgically, self-checks against `style.md`, only role that writes files. Executes plans it did not set.
+- **Critics.** Fresh each round — their value is uncontaminated judgment. Each agent file self-describes its inputs; hand a critic its own file + those inputs, nothing else.
 
-The coordinator (the session agent) owns user communication, sequencing, and the final commit; it does not draft prose or judge quality itself. Where continuing an agent's conversation is supported, send follow-ups there; otherwise include prior output in the new prompt.
+Coordinator (session agent) owns user communication, sequencing, final commit. Above paragraph scope it neither drafts nor judges; at paragraph scope or less it collapses all roles (see Rewriting).
 
 ## Phases
 
-**0 — Takeaways (planner).** The 3–5 sentences the busy reader must retain, plus one per section. This list is the acceptance criteria for every review. If the user stated takeaways, use theirs; otherwise confirm the planner's list with the user before drafting at length.
+**0 — Takeaways (planner).** The 3–5 sentences the reader must retain + one per section. Acceptance criteria for every review. Use the user's if stated; else confirm the planner's list before drafting at length.
 
-**1 — Skeleton (planner).** Headings and the first sentence of every planned paragraph. Fix ordering, missing steps, and buried claims here, where a change costs one line. Do not proceed until the skeleton alone tells the story.
+**1 — Skeleton (planner).** Headings + first sentence of every planned paragraph. Fix ordering, missing steps, buried claims here, where a change costs one line. Don't proceed until the skeleton alone tells the story.
 
-**2 — Expand (editor).** Grow each skeleton sentence into its paragraph, point first, in `style.md`'s voice, without demoting any skeleton sentence from first position. Coordinator checks the seams.
+**2 — Expand (editor).** Grow each skeleton sentence into its paragraph, point first, `style.md` voice, never demoting a skeleton sentence from first position. Coordinator checks the seams.
 
-**3 — Skim review.** Mechanically extract the skim view: headings, first sentence of each paragraph (with one-sentence-per-line layout, the first line after each blank line or heading), figure captions, bold text. Give ONLY this extract to a fresh agent started from scientific-review's `agents/skim-critic.md`. Compare the readback to the takeaway list: every missed or distorted takeaway marks a first sentence not doing its job, a missing entry-point repetition, or a buried section. Fix at the skeleton level, not by adding text.
+**3 — Skim review.** Mechanically extract the skim view: headings, first sentence per paragraph (with one-sentence-per-line layout: the first line after each blank line or heading), captions, bold. Fresh agent from `agents/skim-critic.md`, given ONLY the extract. Compare readback to takeaways — each miss or distortion marks a failing first sentence, a missing entry-point repetition, or a buried section. Fix at skeleton level, not by adding text.
 
-**4 — Adversarial review.** For a section or larger, a fresh agent started from scientific-review's `agents/adversarial-critic.md`, given the full section text (not the skeleton) and the scope to attack. For less than a section, the coordinator applies the same checklist inline. Fold every confirmed objection into the takeaway list. Fix by conceding, qualifying, realigning evidence, or adding a forward-pointer — and prefer cutting a vulnerable element over patching it (scientific-review's simplification principle).
+**4 — Adversarial review.** Section or larger: fresh agent from `agents/adversarial-critic.md`, full text + scope. Smaller: coordinator applies its checklist inline. Fold confirmed objections into the takeaway list; fix by conceding, qualifying, realigning evidence, or a forward-pointer — prefer cutting a vulnerable element over patching (scientific-review's simplification principle).
 
-**5 — Deep review.** Fresh critic started from scientific-review's `agents/style-critic.md`, handed the path to `style.md`, spot-checks touched sentences.
+**5 — Deep review.** Fresh agent from `agents/style-critic.md` + path to `style.md`, over touched sentences.
 
-**6 — Attention budget (planner).** Name each section's one thread in a sentence. Anything not serving it gets cut, demoted to a clause, or moved. Cut before adding.
+**6 — Attention budget (planner).** Name each section's one thread in a sentence; whatever does not serve it gets cut, demoted to a clause, or moved. Cut before adding.
 
-**Loop.** Repeat 3–6 until the skim readback returns the takeaways undistorted, no unanswered objection remains, and the deep check is clean. Two rounds typical; one is suspicious. Then finalize per SKILL.md (commit rules live there).
+**Loop 3–6** until the skim readback returns the takeaways undistorted, no unanswered objection, deep check clean. Two rounds typical; one is suspicious. Then finalize per SKILL.md.
 
 ## Rewriting existing text
 
-The common invocation. Same phases, entered in diagnostic order, scaled to the passage.
+The common invocation. Same phases in diagnostic order, scaled to the passage.
 
-- **Recover takeaways first.** From the user's request or comments addressed to the assistant in the source. Otherwise infer the intended takeaway, state it in one or two sentences, and confirm before rewriting at length. Polishing prose around the wrong takeaway is wasted work.
-- **Extract the existing skeleton before touching prose.** Read headings and first sentences as the skimmer would. Diagnose at this level: buried points, first sentences carrying context instead of claims, sections braiding two threads. Reorder and promote before rewriting any sentence. Most weak passages fail here, not at the sentence level.
-- **Rewrite surgically.** The revision brief lists diagnosed faults and the sentences that already comply and must survive. Every changed line traces to a structural fault or a sentence-rule violation, not to taste. Match the density and idiom of surrounding untouched text.
-- **Scale roles to scope.** For a paragraph or a few sentences, the coordinator works alone: edit inline, apply the checklist in scientific-review's `agents/adversarial-critic.md` inline to load-bearing claims, run Phases 5–6 itself. For a section or more, use full role separation. For edits inside a larger document, check the seams: the rewritten passage must link backward from its first sentence and hand off cleanly.
+- **Recover takeaways first** — from the request or comments in the source. Else infer, state in 1–2 sentences, confirm before rewriting at length. Polishing prose around the wrong takeaway is wasted work.
+- **Extract the existing skeleton before touching prose.** Diagnose there: buried points, first sentences carrying context instead of claims, sections braiding two threads. Reorder and promote before rewriting any sentence — most weak passages fail here, not at sentence level.
+- **Rewrite surgically.** The brief lists diagnosed faults + the sentences that comply and must survive. Every changed line traces to a structural fault or a sentence-rule violation, not taste. Match surrounding density and idiom.
+- **Scale roles to scope.** Paragraph or less: coordinator alone — edit inline, apply the adversarial checklist inline to load-bearing claims, run 5–6 itself. Section or more: full role separation. Edits inside a larger document: check the seams — link backward from the first sentence, hand off cleanly.

@@ -1,46 +1,37 @@
 # Workflow: two layers, coarse to fine
 
-The coordinator (session agent) runs this file top to bottom. It spawns subagents, triages issues, talks to the user, and never judges the manuscript itself. Kept separate from SKILL.md so the orchestration can be redesigned without touching the agent roles.
+Coordinator (session agent) runs this top to bottom: spawns agents, triages issues, talks to the user. Critique itself stays with the agents. Separate file so orchestration can change without touching agent roles.
 
 ## Prerequisites
 
-- The manuscript's repository has a GitHub remote (`gh repo view` succeeds). Without one, stop and tell the user — this workflow stores findings as GitHub issues and has no fallback.
-- Ensure labels exist (`gh label create` for any missing): `review`, `stage:skeleton`, `stage:section`, `stage:paragraph`, `needs-decision`, `locked`.
+- `gh repo view` succeeds; else stop and tell the user — findings are GitHub issues, no fallback.
+- Labels exist (`gh label create` if missing): `review`, `stage:skeleton`, `stage:section`, `stage:paragraph`, `needs-decision`, `locked`.
 
-## The two layers
+## Layers
 
-**Layer 1 — find.** Naive critics attack the manuscript and file every problem as a GitHub issue: logic holes, weak support, claim–evidence mismatches, takeaways the skim does not deliver. Each critic gets its `agents/*.md` file, the input that file names, and the repo + labels for filing. It returns issue numbers with one-line summaries, nothing more.
+**L1 — find.** Naive critics file every problem as an issue: logic holes, weak support, claim–evidence mismatch, undelivered takeaways. Each gets its agent file + the input it names + repo/labels.
 
-**Layer 2 — resolve.** One simplifier (`agents/simplifier.md`) per stage reads the stage's open issues and chooses, per issue: patch, cut, or reject — cut preferred whenever the patch would complicate the argument. It merges duplicates, closes issues its cuts dissolve, appends a recommendation to each survivor, and labels the ones needing the user `needs-decision`.
+**L2 — resolve.** One simplifier per stage reads the stage's open issues; per issue: patch / cut / reject, cut preferred when a patch complicates the argument. Merges duplicates, closes issues its cuts dissolve, appends recommendations, labels `needs-decision` where the user must rule.
 
 ## Stages
 
-Run both layers at each granularity, coarsest first. Do not descend while the current stage has open `needs-decision` issues.
+Coarsest first. Don't descend while `needs-decision` issues are open.
 
-**Stage 1 — skeleton.** Does the document-level argument stand on its own?
+1. **Skeleton** — does the document-level argument stand? Extract the skim view (headings, first sentence per paragraph, captions, bold). In parallel: skim critic (extract only) + adversarial critic (full manuscript; scope: main claims, support chain, ordering, missing steps). Diff the readback against intended takeaways (user's, or confirm now); file an issue per missed or distorted takeaway. Simplifier → decision point.
+2. **Sections** — does each section's logic hold? One adversarial critic per section in parallel (input: section + abstract; scope: its internal argument). Simplifier → decision point.
+3. **Paragraphs** — one point per paragraph, point first, inferences hold? Adversarial critics per section at paragraph scope. Simplifier → decision point.
+4. **Sentences** — no layers, no issues. Style critic (Haiku) on touched sentences + path to `../scientific-writing/style.md`; fix violations via scientific-writing.
 
-1. Extract the skim view mechanically: headings, first sentence of each paragraph, figure captions, bold text.
-2. In parallel: skim critic (the extract only) and adversarial critic (full manuscript; scope: the document-level argument — main claims, their support chain, ordering, missing steps).
-3. Compare the skim readback against the intended takeaways (the user's, or confirm them now); file an issue for every missed or distorted takeaway.
-4. Simplifier, then the decision point.
+## Decision point (each stage)
 
-**Stage 2 — sections.** Does each section's internal logic hold? One adversarial critic per section in parallel (scope: that section's argument; input: the section plus the abstract for anchoring). Then simplifier, decision point.
-
-**Stage 3 — paragraphs.** Does each paragraph make one point, point first, and do the inferences between sentences hold? Adversarial critics per section (scope: paragraph granularity). Then simplifier, decision point.
-
-**Final pass — sentences.** No layers, no issues. Style critic (`agents/style-critic.md`, Haiku) over touched sentences, handed the path to `../scientific-writing/style.md`; hand violations to a scientific-writing edit.
-
-## Decision point — end of every stage
-
-1. Triage from `gh issue list --label "stage:<X>" --state open`; open bodies only where the title is not enough.
-2. Report to the user in Japanese: findings by severity, the simplifier's recommendation on each, `needs-decision` issues as explicit questions.
-3. Record each user ruling as a comment on its issue; label ruled issues `locked`, close the resolved ones.
-4. Apply the agreed fixes under the scientific-writing skill before the next stage, so finer critics review corrected text. If the user asked for review only, stop here and ask before editing anything.
-5. A later critic re-raising a locked ruling: close as duplicate with a pointer to the locked issue. Do not re-litigate.
+1. Triage `gh issue list --label "stage:<X>" --state open`; open bodies only where titles are not enough.
+2. Report per SKILL.md; ask the `needs-decision` questions.
+3. Record rulings as issue comments; label `locked`, close resolved.
+4. Apply agreed fixes (scientific-writing) before the next stage. Review-only request: stop here, ask before editing.
+5. Later critic re-raises a locked ruling → close as duplicate pointing at it. No re-litigating.
 
 ## Issue conventions
 
-- Title: `[skeleton|section|paragraph] <one-line finding>`. Body: where (section/paragraph), the claim, the objection as a hostile reviewer would voice it, and what evidence bears on it.
-- Labels on creation: `review` plus the stage label.
-- The simplifier appends `## Recommendation` — patch / cut / reject, with the concrete move.
-- Critics and the simplifier return numbers and one-liners only; full text stays on the issues.
+- Title `[skeleton|section|paragraph] <one-line finding>`. Body: where, claim, objection as a hostile reviewer would voice it, bearing evidence. Labels: `review` + stage.
+- Simplifier appends `## Recommendation` — patch/cut/reject + the concrete move.
+- Agents return numbers + one-liners; full text stays on the issues.

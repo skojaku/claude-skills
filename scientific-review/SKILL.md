@@ -5,27 +5,27 @@ description: Hierarchical review of scientific documents (papers, grant proposal
 
 # Scientific Review
 
-Two-layer, staged review pipeline for the user's scientific documents. Layer 1 finds problems; Layer 2 decides the cheapest sound response to each, preferring to cut logic rather than add it. Findings live in GitHub issues, not in chat. This skill decides what to change but never edits the manuscript — edits happen afterwards under the scientific-writing skill.
+Two-layer staged review. Layer 1 finds problems; Layer 2 picks the cheapest sound fix, cutting logic over adding it. Findings live in GitHub issues, not chat. This skill decides what to change; edits run under scientific-writing.
 
-- **`workflow.md`** — the orchestration: stages, layers, issue conventions, decision points. Read first on any review request.
-- **`agents/skim-critic.md`** — Layer 1. A naive busy reader; reads back what the skim extract alone conveys.
-- **`agents/adversarial-critic.md`** — Layer 1. A hostile expert; attacks claims and evidence at the stage's granularity.
-- **`agents/simplifier.md`** — Layer 2. Triages the filed issues: patch, cut, or reject; owns the risk–return audit.
-- **`agents/style-critic.md`** — final pass. Sentence-level check against scientific-writing's `style.md`.
+- `workflow.md` — stages, layers, issue conventions, decision points. Read first on any review request.
+- `agents/skim-critic.md` — L1: naive busy reader, reads back the skim extract.
+- `agents/adversarial-critic.md` — L1: hostile expert, attacks claims and evidence at the stage's scope.
+- `agents/simplifier.md` — L2: triages issues (patch/cut/reject), owns the risk–return audit.
+- `agents/style-critic.md` — final pass: sentences vs scientific-writing's `style.md`.
 
-Each `agents/*.md` file fully describes one subagent: its role, its exact inputs, its output contract. To spawn one, pass it the file's content plus only the inputs the file names — nothing else.
+Each agent file fully defines one subagent: role, inputs, output. Spawn with the file's content + only the inputs it names.
 
 ## Principles
 
-- **Critics are naive.** A Layer 1 critic sees only the manuscript (the skim critic: only the skim extract). No conversation history, no skill files, no takeaway list. Naivety is the measurement instrument.
-- **Simple beats complex.** A clear argument outperforms a precise but braided one that does the same work; a reader who cannot follow the defense rejects, they do not suspend judgment. When a patch would add a qualifier chain or a new argumentative thread, cut the vulnerable element instead and move its function to a stronger instrument the document already has.
-- **Findings are issues.** Critics file GitHub issues and return only issue numbers; the coordinator triages from `gh issue list` and opens bodies selectively, keeping full critiques out of its context.
-- **Decisions lock.** Once the user rules on a finding, the ruling is recorded on the issue and later stages do not reopen it.
+- **Critics are naive.** Only the manuscript (skim critic: only the extract) + repo/labels for filing. No history, no skill files, no takeaway list. Naivety is the measurement instrument.
+- **Simple beats complex.** A reader who cannot follow a braided defense rejects. If a patch adds a qualifier chain or a new thread, cut the element and move its function to a stronger instrument already in the document.
+- **Findings are issues.** Agents return issue numbers + one-liners only; coordinator triages from `gh issue list`, opens bodies selectively.
+- **Decisions lock.** User rulings recorded on the issue; later stages never reopen them.
 
 ## Models
 
-Layer 1 critics and the simplifier run on Opus-tier agents. The style critic runs on Haiku. Post-review edits (under scientific-writing) use Sonnet-tier editors, Haiku for pure wording fixes.
+Critics + simplifier: Opus. Style critic: Haiku. Post-review edits (scientific-writing): Sonnet, Haiku for wording.
 
 ## Reporting
 
-Report to the user in Japanese: per stage, findings ranked by severity with Layer 2's recommendation on each, and the `needs-decision` issues as explicit questions. Do not translate the document's own prose.
+Japanese. Per stage: findings by severity with L2's recommendation; `needs-decision` issues as explicit questions. Never translate the document's own prose.
