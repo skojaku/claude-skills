@@ -6,8 +6,8 @@ Phased loop for drafting and rewriting, harness-agnostic. SKILL.md's reader mode
 
 Separate deciding, writing, and attacking. Where the environment can delegate (subagents, spawned agents, parallel sessions), give each role its own fresh agent. Where it cannot, run each role as a separate bounded pass with only that role's inputs in view, and state in the report that reviews were self-run — a drafter grading its own text is a weaker guarantee than an independent reader.
 
-- **Planner.** Owns takeaways, skeleton, attention-budget pass. Reads critic findings against the takeaways, decides which to act on, writes revision briefs (diagnosed faults, not rewritten sentences). Highest-judgment role; give it the strongest reasoning capacity available.
-- **Editor.** Expands the skeleton into prose or rewrites diagnosed passages surgically, self-checks against the invoking skill's sentence-level rules, and is the only role that writes files. Executes plans it did not set. Lightest sufficient capacity.
+- **Planner.** Owns takeaways, skeleton, attention-budget pass. Reads critic findings against the takeaways, decides which to act on, writes revision briefs (diagnosed faults, not rewritten sentences). Highest-judgment role; give it the strongest reasoning capacity available (Opus-tier).
+- **Editor.** Expands the skeleton into prose or rewrites diagnosed passages surgically, self-checks against `style.md`'s self-check list, and is the only role that writes files. Executes plans it did not set. Lightest sufficient capacity (Sonnet-tier; Haiku for pure wording fixes).
 - **Critics.** Spawn fresh each round; their value is uncontaminated judgment. Invoked from the scientific-review skill's `agents/` directory. Input contract is self-described in each agent file — do not hand a critic anything beyond what its file specifies.
 
 The coordinator (the session agent) owns user communication, sequencing, and the final commit; it does not draft prose or judge quality itself. Where continuing an agent's conversation is supported, send follow-ups there; otherwise include prior output in the new prompt.
@@ -18,17 +18,17 @@ The coordinator (the session agent) owns user communication, sequencing, and the
 
 **1 — Skeleton (planner).** Headings and the first sentence of every planned paragraph. Fix ordering, missing steps, and buried claims here, where a change costs one line. Do not proceed until the skeleton alone tells the story.
 
-**2 — Expand (editor).** Grow each skeleton sentence into its paragraph, point first, in the invoking skill's voice, without demoting any skeleton sentence from first position. Coordinator checks the seams.
+**2 — Expand (editor).** Grow each skeleton sentence into its paragraph, point first, in `style.md`'s voice, without demoting any skeleton sentence from first position. Coordinator checks the seams.
 
 **3 — Skim review.** Mechanically extract the skim view: headings, first sentence of each paragraph (with one-sentence-per-line layout, the first line after each blank line or heading), figure captions, bold text. Give ONLY this extract to a fresh agent started from scientific-review's `agents/skim-critic.md`. Compare the readback to the takeaway list: every missed or distorted takeaway marks a first sentence not doing its job, a missing entry-point repetition, or a buried section. Fix at the skeleton level, not by adding text.
 
 **4 — Adversarial review.** For a section or larger, a fresh agent started from scientific-review's `agents/adversarial-critic.md`, given the full section text (not the skeleton) and the scope to attack. For less than a section, the coordinator applies the same checklist inline. Fold every confirmed objection into the takeaway list. Fix by conceding, qualifying, realigning evidence, or adding a forward-pointer — and prefer cutting a vulnerable element over patching it (scientific-review's simplification principle).
 
-**5 — Deep review.** Fresh critic started from the invoking skill's deep critic (for scientific documents, scientific-review's `agents/style-critic.md`) spot-checks touched sentences against the invoking skill's sentence-level rules.
+**5 — Deep review.** Fresh critic started from scientific-review's `agents/style-critic.md`, handed the path to `style.md`, spot-checks touched sentences.
 
 **6 — Attention budget (planner).** Name each section's one thread in a sentence. Anything not serving it gets cut, demoted to a clause, or moved. Cut before adding.
 
-**Loop.** Repeat 3–6 until the skim readback returns the takeaways undistorted, no unanswered objection remains, and the deep check is clean. Two rounds typical; one is suspicious. Then hand back to the invoking skill for finalization (commit rules live there).
+**Loop.** Repeat 3–6 until the skim readback returns the takeaways undistorted, no unanswered objection remains, and the deep check is clean. Two rounds typical; one is suspicious. Then finalize per SKILL.md (commit rules live there).
 
 ## Rewriting existing text
 
