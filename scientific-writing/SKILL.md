@@ -12,8 +12,8 @@ This skill overlays the user's personal voice on top of the writing-for-busy-rea
 ## Routing
 
 - A wording or sentence-level edit -> read `style.md`, make the edit, run its self-check list. No review passes.
-- Drafting or rewriting a paragraph or more -> load the writing-for-busy-readers skill (invoke it by name through the environment's skill mechanism where available; otherwise read `../writing-for-busy-readers/SKILL.md` — the skills are installed side by side) and follow its workflow. Where its review phases ask for the invoking skill's further audit or deep critic, use the scientific-review skill's `review-grant.md` and `agents/style-critic.md`.
-- A review request without editing -> switch to the scientific-review skill.
+- Drafting or rewriting a paragraph or more -> load the writing-for-busy-readers skill (invoke it by name through the environment's skill mechanism where available; otherwise read `../writing-for-busy-readers/SKILL.md` — the skills are installed side by side) and follow its workflow. Its review phases start their critics from the scientific-review skill's `agents/`; this skill's deep critic is scientific-review's `agents/style-critic.md`, handed the path to `style.md`.
+- A review request without editing -> switch to the scientific-review skill and follow its `workflow.md`.
 
 ## After editing
 

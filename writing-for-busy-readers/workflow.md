@@ -1,6 +1,6 @@
 # Workflow: the drafting–review loop
 
-Phased loop for drafting and rewriting, harness-agnostic. SKILL.md's reader model and structure rules are assumed; reviews follow review.md. Draft in explicit passes, not linearly with a polish at the end. For a multi-section document, run the loop per section, then once over the whole document.
+Phased loop for drafting and rewriting, harness-agnostic. SKILL.md's reader model and structure rules are assumed; the review phases start their critics from the scientific-review skill's `agents/` directory (side-by-side install: `../scientific-review/agents/`). Draft in explicit passes, not linearly with a polish at the end. For a multi-section document, run the loop per section, then once over the whole document.
 
 ## Roles
 
@@ -8,7 +8,7 @@ Separate deciding, writing, and attacking. Where the environment can delegate (s
 
 - **Planner.** Owns takeaways, skeleton, attention-budget pass. Reads critic findings against the takeaways, decides which to act on, writes revision briefs (diagnosed faults, not rewritten sentences). Highest-judgment role; give it the strongest reasoning capacity available.
 - **Editor.** Expands the skeleton into prose or rewrites diagnosed passages surgically, self-checks against the invoking skill's sentence-level rules, and is the only role that writes files. Executes plans it did not set. Lightest sufficient capacity.
-- **Critics.** Spawn fresh each round; their value is uncontaminated judgment. Invoked in the `agents/` directory of this skill (or an invoking skill's own `agents/`). Input contract is self-described in each agent file — do not hand a critic anything beyond what its file specifies.
+- **Critics.** Spawn fresh each round; their value is uncontaminated judgment. Invoked from the scientific-review skill's `agents/` directory. Input contract is self-described in each agent file — do not hand a critic anything beyond what its file specifies.
 
 The coordinator (the session agent) owns user communication, sequencing, and the final commit; it does not draft prose or judge quality itself. Where continuing an agent's conversation is supported, send follow-ups there; otherwise include prior output in the new prompt.
 
@@ -20,11 +20,11 @@ The coordinator (the session agent) owns user communication, sequencing, and the
 
 **2 — Expand (editor).** Grow each skeleton sentence into its paragraph, point first, in the invoking skill's voice, without demoting any skeleton sentence from first position. Coordinator checks the seams.
 
-**3 — Skim review.** Run review.md's skim review.
+**3 — Skim review.** Mechanically extract the skim view: headings, first sentence of each paragraph (with one-sentence-per-line layout, the first line after each blank line or heading), figure captions, bold text. Give ONLY this extract to a fresh agent started from scientific-review's `agents/skim-critic.md`. Compare the readback to the takeaway list: every missed or distorted takeaway marks a first sentence not doing its job, a missing entry-point repetition, or a buried section. Fix at the skeleton level, not by adding text.
 
-**4 — Adversarial review.** Run review.md's adversarial review. If a companion skill defines a further audit on top (e.g. scientific-review's review-grant.md for grant documents), run it here too.
+**4 — Adversarial review.** For a section or larger, a fresh agent started from scientific-review's `agents/adversarial-critic.md`, given the full section text (not the skeleton) and the scope to attack. For less than a section, the coordinator applies the same checklist inline. Fold every confirmed objection into the takeaway list. Fix by conceding, qualifying, realigning evidence, or adding a forward-pointer — and prefer cutting a vulnerable element over patching it (scientific-review's simplification principle).
 
-**5 — Deep review.** Fresh deep critic spot-checks touched sentences against the invoking skill's sentence-level self-check list.
+**5 — Deep review.** Fresh critic started from the invoking skill's deep critic (for scientific documents, scientific-review's `agents/style-critic.md`) spot-checks touched sentences against the invoking skill's sentence-level rules.
 
 **6 — Attention budget (planner).** Name each section's one thread in a sentence. Anything not serving it gets cut, demoted to a clause, or moved. Cut before adding.
 
@@ -37,4 +37,4 @@ The common invocation. Same phases, entered in diagnostic order, scaled to the p
 - **Recover takeaways first.** From the user's request or comments addressed to the assistant in the source. Otherwise infer the intended takeaway, state it in one or two sentences, and confirm before rewriting at length. Polishing prose around the wrong takeaway is wasted work.
 - **Extract the existing skeleton before touching prose.** Read headings and first sentences as the skimmer would. Diagnose at this level: buried points, first sentences carrying context instead of claims, sections braiding two threads. Reorder and promote before rewriting any sentence. Most weak passages fail here, not at the sentence level.
 - **Rewrite surgically.** The revision brief lists diagnosed faults and the sentences that already comply and must survive. Every changed line traces to a structural fault or a sentence-rule violation, not to taste. Match the density and idiom of surrounding untouched text.
-- **Scale roles to scope.** For a paragraph or a few sentences, the coordinator works alone: edit inline, apply the checklist in agents/adversarial-critic.md inline to load-bearing claims, run Phases 5–6 itself. For a section or more, use full role separation. For edits inside a larger document, check the seams: the rewritten passage must link backward from its first sentence and hand off cleanly.
+- **Scale roles to scope.** For a paragraph or a few sentences, the coordinator works alone: edit inline, apply the checklist in scientific-review's `agents/adversarial-critic.md` inline to load-bearing claims, run Phases 5–6 itself. For a section or more, use full role separation. For edits inside a larger document, check the seams: the rewritten passage must link backward from its first sentence and hand off cleanly.

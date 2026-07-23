@@ -1,14 +1,13 @@
 ---
 name: writing-for-busy-readers
-description: Structure, draft, and review long-form text (reports, docs, papers, proposals) for busy readers who skim. Skeleton-first drafting loop with a skim-reader review pass and an adversarial claim-and-evidence review pass. Usable standalone or as the foundation other skills (e.g. scientific-writing, scientific-review) build domain-specific voice and review on top of.
+description: Structure and draft long-form text (reports, docs, papers, proposals) for busy readers who skim. Skeleton-first drafting loop with review checkpoints; the critics those checkpoints call live in the scientific-review skill. Usable standalone or as the foundation other skills (e.g. scientific-writing) build domain-specific voice on top of. For a review-only request, use scientific-review directly.
 ---
 
 # Writing for Busy Readers
 
-Shared foundation. Task rules live in companion files; read the ones the task needs before producing anything. Never draft from this file alone.
+Shared foundation. Task rules live in companion files; read the ones the task needs before producing anything. Never draft from this file alone. Reviewing is not this skill's job — the scientific-review skill owns the critics and the review workflow; this skill's drafting loop calls into its `agents/` at the review checkpoints.
 
 - **`workflow.md`** — the drafting–review loop and rewrite entry path. Read when drafting or rewriting more than a paragraph.
-- **`review.md`** — skim review, adversarial review, reporting format. Read for review phases and any review-only request.
 
 ## Reader model
 
@@ -35,8 +34,8 @@ Every rule derives from how busy experts read:
 ## Routing
 
 - Drafting from a skeleton, or a rewrite larger than a paragraph -> `workflow.md`.
-- A review request, or entering workflow.md's review phases -> `review.md`.
-- Starting a critic: hand that critic only its own `agents/*.md` file plus the exact input the file specifies. Do not hand a critic the rest of this skill.
+- A review request without editing -> the scientific-review skill.
+- Starting a critic (workflow.md Phases 3–5): critics live in the scientific-review skill's `agents/` directory (side-by-side install: `../scientific-review/agents/`). Hand a critic only its own agent file plus the exact input the file specifies. Do not hand a critic the rest of this skill.
 
 ## Delegation
 
