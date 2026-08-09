@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
-"""Shared render gate for all modules. Imported by each module's thin check_render.py.
+"""Shared render gate for all decks. Imported by each deck's thin check_render.py.
 
-Single source of truth. The per-module copy-and-edit pattern lost checks across module
-boundaries: caption_colours (m02 only), em_dashes (m03 only), _flood_from_border (m02→lost
-in m03→rebuilt in m04). This module carries every check ever written; the per-module
-script carries only the module's constants and deck filename.
+Single source of truth, so a check fixed in one deck's copy is never silently lost
+when the next deck's thin wrapper is copied from an older one. This module carries
+every check ever written; the per-deck script carries only that deck's constants
+and filename.
 
-Usage from a module directory:
+Usage from a deck directory:
 
-    # check_render.py (per module, thin)
+    # check_render.py (per deck, thin)
     import sys, os
-    sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+    sys.path.insert(0, os.path.expanduser("~/.claude/skills/slide-build"))
     from gatelib.check_render import run
-    run(deck="m0N-<slug>.md", node_fills=[...], fig_h={...}, exempt_figures=[...])
+    run(deck="<slug>.md", fig_h={...}, exempt_figures=[...])
+
+    # Only pass node_fills=[(R,G,B), ...] if the deck draws circular node-link
+    # diagrams (network/graph figures) and you want their disc size checked.
+    # It is off by default.
 """
 
 import glob
@@ -278,14 +282,17 @@ def run(deck, node_fills=None, fig_h=None, exempt_figures=None,
 
     Args:
         deck: path to the Marp deck markdown file
-        node_fills: list of (R,G,B) tuples for node disc detection
+        node_fills: list of (R,G,B) tuples for node disc detection. Opt-in:
+            this check only applies to decks with circular node-link diagrams
+            (network/graph figures, flowcharts with round nodes, etc.). Leave
+            unset (or pass []) to skip it entirely — the default is off.
         fig_h: dict of figure height caps by modifier class
         exempt_figures: filenames to skip (historical photos, etc.)
         col_w: column container width in px
         full_img_w: full-width image cap in px
     """
     if node_fills is None:
-        node_fills = [(0x39, 0x59, 0xA6), (0xB1, 0x44, 0x34)]
+        node_fills = []
     if fig_h is None:
         fig_h = {"": 380, "tight": 320, "stack": 190, "tall": 400}
     if exempt_figures is None:

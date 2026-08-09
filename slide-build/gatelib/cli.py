@@ -92,7 +92,8 @@ def cmd_check(module_dir, args):
         module_script = os.path.join(module_dir, "check_render.py")
         if os.path.exists(module_script):
             r = subprocess.run(
-                [sys.executable, module_script],
+                [sys.executable, os.path.abspath(module_script)],
+                cwd=os.path.abspath(module_dir),
                 capture_output=True, text=True
             )
             print(r.stdout)
@@ -115,7 +116,8 @@ def cmd_check_render(module_dir, args):
     if not os.path.exists(module_script):
         print(f"no check_render.py in {module_dir}", file=sys.stderr)
         return 2
-    r = subprocess.run([sys.executable, module_script])
+    r = subprocess.run([sys.executable, os.path.abspath(module_script)],
+                        cwd=os.path.abspath(module_dir))
     return r.returncode
 
 

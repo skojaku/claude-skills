@@ -1,24 +1,27 @@
 # gatelib — slide deck QA pipeline
 
 Single CLI entry point (`deckgate`) for all automated slide checks, fixes, and
-review image preparation. Replaces per-module copy-and-edit scripts.
+review image preparation for any Marp deck. Replaces per-deck copy-and-edit scripts.
 
 ## Quick start
 
+Run from this directory (`~/.claude/skills/slide-build/`), passing an absolute or
+relative path to your deck's directory — it does not need to live under this repo:
+
 ```sh
-cd docs/slide/new
+cd ~/.claude/skills/slide-build
 
 # Full pipeline: auto-fix → render → check → prepare review images
-python3 -m gatelib review m01
+python3 -m gatelib review /path/to/my-deck
 
 # Individual commands
-python3 -m gatelib check m01              # all checks
-python3 -m gatelib check-deck m01         # source-level only
-python3 -m gatelib check-render m01       # pixel-level only
-python3 -m gatelib fix m01                # auto-fix mechanical issues
-python3 -m gatelib fix m01 --dry-run      # preview fixes
-python3 -m gatelib prepare m01 --changed-only  # downscaled review images
-python3 -m gatelib render m01             # render + check
+python3 -m gatelib check /path/to/my-deck              # all checks
+python3 -m gatelib check-deck /path/to/my-deck         # source-level only
+python3 -m gatelib check-render /path/to/my-deck       # pixel-level only
+python3 -m gatelib fix /path/to/my-deck                # auto-fix mechanical issues
+python3 -m gatelib fix /path/to/my-deck --dry-run      # preview fixes
+python3 -m gatelib prepare /path/to/my-deck --changed-only  # downscaled review images
+python3 -m gatelib render /path/to/my-deck             # render + check
 ```
 
 ## What it automates
@@ -29,7 +32,7 @@ python3 -m gatelib render m01             # render + check
 | KaTeX in HTML blocks | ✅ | `fix` |
 | Demo links in speaker notes | ✅ | `fix` |
 | Trailing whitespace | ✅ | `fix` |
-| Node disc sizes | ❌ | `check-render` |
+| Node disc sizes (opt-in, network/graph diagrams) | ❌ | `check-render` |
 | Text size (x-height) | ❌ | `check-render` |
 | Content overflow | ❌ | `check-render` |
 | Container mismatch | ❌ | `check-render` |
@@ -52,9 +55,10 @@ gatelib/
   review_images.py  # downscale/contact-sheet for LLM review
 ```
 
-Each module (`m01`–`m06`) keeps a thin `check_render.py` wrapper that carries
-only its constants (deck filename, NODE_FILLS palette, FIG_H modifiers, exempt
-figures). All logic lives in gatelib.
+Each deck keeps a thin `check_render.py` wrapper that carries only its own
+constants (deck filename, FIG_H modifiers, exempt figures, and — only if the
+deck draws circular node-link diagrams — a NODE_FILLS palette). All logic
+lives in gatelib. See `../template/check_render.py` for a starting point.
 
 ## Render hash change detection
 
@@ -68,17 +72,14 @@ A figure edit propagates to every slide that uses it — the hash catches this.
 With `--changed-only`, only changed slides are prepared. Typical savings:
 75% per slide, 95% when combined with changed-only filtering.
 
-## Recovered checks
+## Why a shared library, not per-deck copies
 
-Checks that were lost in the per-module copy pattern:
-
-| Check | Written for | Lost in | Recovered |
-|-------|------------|---------|-----------|
-| `caption_colours` | m02 | m03+ | gatelib |
-| `em_dashes` | m03 | m04+ | gatelib |
-| `_flood_from_border` | m02 | m03 | gatelib |
+This started as a per-deck copy-and-edit script. Checks written for one deck
+(`caption_colours`, `em_dashes`, a border-flood-fill helper) were silently lost
+whenever the next deck copied an older version instead of the latest one.
+Centralizing in gatelib means a check fixed once is fixed for every deck.
 
 ## Adding a new check
 
-Add it to `check_render.py` or `check_deck.py` in gatelib. Every module
-inherits it on the next run. No per-module copies to update.
+Add it to `check_render.py` or `check_deck.py` in gatelib. Every deck
+inherits it on the next run. No per-deck copies to update.
