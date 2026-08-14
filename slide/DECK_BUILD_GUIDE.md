@@ -68,12 +68,18 @@ Scaffold a new deck from the bundled template — do not reinvent:
       <deck-slug>.md         the deck (marp front matter, math: katex)
       theme.css               copy from the skill's bundled default, or your own
       figures/                make_figures.py (+ make_animations.py), emitted PNG/GIF
-      check_render.py         copy from `~/.claude/skills/slide-build/template/`, adjust
+      check_render.py         copy from `~/.claude/skills/slide/template/`, adjust
                                the deck filename — the build gate
       review/                 DECK_SPEC.md, FIGURE_SPEC.md, FIXES_Rn.md, rendered slide.NNN.png
       README.md               build commands (copy the template's and adjust)
 
-See `~/.claude/skills/slide-build/template/` for a ready-to-copy starting point.
+See `~/.claude/skills/slide/template/` for a ready-to-copy starting point.
+
+`check_render.py` is not optional. A deck that skips it gets the gatelib line
+`(no check_render.py in module)` and every pixel-level check — overflow, text size,
+container mismatch — silently does not run. One results deck went through several review
+rounds that way; its bullet overflow and clipped legends were all found by eye, late.
+Copy the template's file when the deck directory is created, not "later".
 
 Gather your source material before writing DECK_SPEC.md — an outline, existing notes, a
 script, a curriculum entry, whatever you are starting from. The four-act arc (below) is
@@ -107,7 +113,7 @@ What thirteen rounds settled into; skipping a step reliably cost a round.
    26–52px, opt-in, for decks with circular node-diagrams — see `FIGURE_GUIDE.md`). It
    reproduces a human reviewer's measurements to the pixel; a green run is the completion
    criterion for figure work, not a matter of taste.
-5. **Then the tiered review loop** — `/slide-review`, run per `REVIEW_PLAYBOOK.md`:
+5. **Then the tiered review loop** — `/slide` in review mode, run per `REVIEW_PLAYBOOK.md`:
    - **Tier 0** every round: `check_render.py` + `check_deck.py` (zero tokens)
    - **Tier 1** per round: LLM review of only changed slides, judgment criteria only
    - **Tier 2** once before shipping: full-deck LLM review, all criteria
@@ -277,6 +283,15 @@ Two defences:
   rule as "check every slide that uses the figure", extended to the words underneath.
 - Prefer captions a regrouping cannot stale. Describe the *shape* of the finding ("most of
   the mass sits at the low end") rather than the specific grouping that produced it.
+
+## Ship the artifact the deck is read from
+
+If the deck is distributed as a PDF (the house convention for results decks is a
+compiled PDF committed next to the markdown), recompile and commit that PDF with **every**
+content commit — deck edits and figure regenerations both. One experiment's committed
+`results.pdf` was four days and one full rewrite behind its `results.md`: readers of the
+PR were reviewing conclusions the run had already retracted. The render gate does not
+check this; make it part of the commit, not a separate step someone remembers.
 
 ## Keeping this current
 

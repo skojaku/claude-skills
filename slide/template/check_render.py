@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Render gate for this deck — thin wrapper around gatelib. All the actual
-logic lives in ~/.claude/skills/slide-build/gatelib/check_render.py. This
+logic lives in ~/.claude/skills/slide/gatelib/check_render.py. This
 file carries only this deck's own constants.
 
 Copy this file into your deck's directory alongside deck.md and adjust the
@@ -8,7 +8,7 @@ constants below.
 """
 
 import sys, os
-sys.path.insert(0, os.path.expanduser("~/.claude/skills/slide-build"))
+sys.path.insert(0, os.path.expanduser("~/.claude/skills/slide"))
 from gatelib.check_render import run
 
 run(

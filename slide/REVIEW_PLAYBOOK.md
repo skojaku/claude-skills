@@ -1,8 +1,8 @@
 # Slide review playbook
 
 How to run the review → fix → re-verify loop. `SLIDE_RUBRIC.md` (alongside this file)
-says what to check; `DECK_BUILD_GUIDE.md` and `FIGURE_GUIDE.md` (in `slide-build/`) say
-how to author decks and figures; this file says how to run the loop without repeating
+says what to check; `DECK_BUILD_GUIDE.md` and `FIGURE_GUIDE.md` (alongside this file)
+say how to author decks and figures; this file says how to run the loop without repeating
 mistakes that have already cost rounds.
 
 Every rule below is here because it failed at least once during an early deck rebuild
@@ -113,6 +113,15 @@ which is harder to notice because nothing looks broken. Run it bare, or capture 
 
 and quote the exit status in the round's report, not the words "all checks pass" scraped
 out of the middle of the output.
+
+The same disease has a snakemake variant that cost a round in a later deck:
+
+    snakemake -c4 -f figures/a.png figures/b.png 2>&1 | tail -2; echo "exit=$?"
+
+`$?` is tail's. The run printed a normal-looking log tail, `exit=0`, and had failed one of
+its two rules — five figures were silently absent from disk and the miss was only caught by
+counting `ls figures/*.png`. After any multi-target build, count the outputs; after any
+piped command, ask whose exit status you just read.
 
 ### A gate that cannot fire is worse than no gate
 
@@ -466,7 +475,7 @@ these were found by LLM reviewers reading PNGs at ~10K tokens per slide.
 
 Run it after the render checker and before launching any reviewer:
 
-    cd ~/.claude/skills/slide-build
+    cd ~/.claude/skills/slide
     python3 -m gatelib check-render /path/to/deck   # pixel-level checks
     python3 -m gatelib check-deck /path/to/deck     # source-level checks
     # only then: LLM review of judgment criteria

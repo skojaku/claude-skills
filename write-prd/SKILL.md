@@ -1,3 +1,8 @@
+---
+name: write-prd
+description: Interview the user and draft a Product Requirements Document (PRD) as a GitHub issue. Use when the user wants to create a PRD, spec a feature, or turn a problem statement into an implementation plan.
+---
+
 This skill will be invoked when the user wants to create a PRD. You should go through the steps below. You may skip steps if you don't consider them necessary.
 
 1. Ask the user for a long, detailed description of the problem they want to solve and any potential ideas for solutions.

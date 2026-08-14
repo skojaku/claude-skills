@@ -25,7 +25,7 @@ to report findings, not to fix them — fixing is a separate task.
 
 ```sh
 cd <deck dir>
-marp <deck>.md --theme ~/.claude/skills/slide-build/theme.css --allow-local-files \
+marp <deck>.md --theme ~/.claude/skills/slide/theme.css --allow-local-files \
      --images png -o review/slide.png --no-stdin   # emits review/slide.001.png … one per slide
 ```
 
@@ -47,6 +47,17 @@ is usually a figure or layout finding.
 Go slide by slide against every criterion below. For dense slides, open the
 markdown source and confirm a disclosure mechanism exists (`*` fragment lists, or
 a build sequence of consecutive slides adding one element to the same figure).
+
+### 3b. Numbers pass
+
+Verify every concrete number on the slides against the experiment's data tables and
+notes (NOTE.md or equivalent) before shipping — spawn a verification agent if the deck
+is data-backed. Classify each: OK / STALE / UNSUPPORTED / MISMATCH. One results deck
+shipped four bad numbers at once: a "0–11 %" range the data put at 0.4–17.8 %, a
+"six times the information" with no defensible denominator, a title crediting the call
+count to fewer models than produced it, and a temperature claim its own resample arm
+exceeded. All four read as precise and all four were wrong; only recomputation finds
+this class.
 
 ### 4. Structure pass
 
@@ -110,6 +121,17 @@ Use the report format at the bottom. Order findings by severity, then slide numb
   reference the same figure file but explain it differently (different captions,
   different narrative roles), one slide gets content the other hasn't introduced.
   Emit two files. `check_deck.py` flags this automatically.
+- **F7 · Major — A bullet cites only what its figure shows.** Every number in a
+  figure slide's text must be visible on, or directly readable from, that figure.
+  A range computed from a stdout table that the figure never plots reads as
+  authoritative and is unverifiable by the room ("changes its answer 0–11 % of the
+  time" under a figure with no change rates on it — and the range was wrong too).
+- **F8 · Major — Every plotted quantity is named.** Each marker series, reference
+  line, and annotation column carries the symbol or name the deck defined for it
+  ($\beta_q$, $J_q$), in the legend or a column header. A square labelled only
+  "checked by X" under a y axis that says "rate" severs the link to the slide that
+  defined the rate; a grey column of "+0.65 [+0.58, +0.71]" with no header is
+  unexplained digits. Both happened on the same deck in one round.
 - **F5 · Minor — Palette discipline.** Use the theme tokens (accent `#3959A6`,
   accent-2 `#B14434`, accent-3 `#DAB167`, annotation gray `#6b6b6b`, for the bundled
   default theme — substitute your own theme's tokens if different). The palette is
@@ -155,6 +177,28 @@ Use the report format at the bottom. Order findings by severity, then slide numb
   a beat for thinking (turn to your neighbor / take 30 seconds), then the answer.
   Revealing the punchline in the same breath as the question is a Major. The answer
   must not appear *anywhere* on the question slide — check the notes, not just the body.
+
+- **N5 · Major — One storyline, serialized.** Never run two experimental threads in
+  parallel. A setup slide that introduces two measurement pipelines at once ("Phase A
+  … Phase B …") launches two storylines and the reader tracks neither. Present the
+  first experiment plainly (without calling it "phase 1"), close it with a findings
+  summary slide, then open the next as a follow-up question. Check the whole deck for
+  parallel threads and serialize every one.
+- **N6 · Major — The naive-reader test.** A reader who knows nothing of the project
+  must be able to follow from slide 1. Internal context — a sibling experiment, a
+  prior run, a framing the team studies — is either introduced on its own slide
+  (a failed prior run often makes the best opening story) or cut. "Why does this
+  experiment exist" must be answered before any theory or setup slide, and the
+  why must visibly translate into the how ("everything a vote or a reviewer can do
+  is a function of three per-question rates" is a bridge; a pipeline diagram is not).
+- **N7 · Major — Plain academic language.** No software-engineering jargon on slides
+  or figures: "arm", "cell", "probed items", "screened" become "condition",
+  "model × benchmark", "the questions the author ever got wrong", "reviewed". No
+  rhetorical metaphor doing load-bearing work: "the taller spike swaps ends",
+  "ladder", "waves through", "only downhill", "borrowed ability" all lose to the
+  direct sentence ("the tall spike is at 1 for weak models, at 0 for strong ones").
+  Prefer "questions" to "items". Isolated instances are Minors; a deck written in
+  this register is a Major.
 
 ### S — Deck structure (four-act arc + milestones)
 
@@ -226,8 +270,8 @@ with real findings from your own deck's first round as soon as you have one.
 
 ## Keeping this current
 
-Same contract as the other guides in this skill family — `DECK_BUILD_GUIDE.md` and
-`FIGURE_GUIDE.md` (authoring, in `slide-build/`), `REVIEW_PLAYBOOK.md` (the review
-loop, alongside this file in `slide-review/`) — when a review teaches something new
+Same contract as the other guides in this skill family, all alongside this file —
+`DECK_BUILD_GUIDE.md` and `FIGURE_GUIDE.md` (authoring), `REVIEW_PLAYBOOK.md` (the
+review loop) — when a review teaches something new
 about *what good looks like*, add it here; loop-process lessons go to
 `REVIEW_PLAYBOOK.md`, authoring lessons go to `DECK_BUILD_GUIDE.md`/`FIGURE_GUIDE.md`.

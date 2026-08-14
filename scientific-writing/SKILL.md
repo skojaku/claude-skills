@@ -40,4 +40,4 @@ Busy experts:
 
 ## After editing
 
-`git add`, commit (Co-Authored-By trailer), push. Report in Japanese: diagnosis, what changed and why, what was deliberately left alone. Never translate the document's own prose.
+`git add`, commit (Co-Authored-By trailer), push. Report: diagnosis, what changed and why, what was deliberately left alone. Never translate the document's own prose.

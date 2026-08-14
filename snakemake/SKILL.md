@@ -1,3 +1,8 @@
+---
+name: snakemake
+description: Snakemake style guide and conventions for building reproducible data pipelines. Covers project layout, naming, rules, paramspace, dual-mode scripts, and utility functions.
+---
+
 # Snakemake Style Guide
 
 Copy `utils.smk` from `.claude/skills/snakemake/utils.smk` to project root for new projects.

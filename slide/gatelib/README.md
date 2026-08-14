@@ -5,11 +5,11 @@ review image preparation for any Marp deck. Replaces per-deck copy-and-edit scri
 
 ## Quick start
 
-Run from this directory (`~/.claude/skills/slide-build/`), passing an absolute or
+Run from this directory (`~/.claude/skills/slide/`), passing an absolute or
 relative path to your deck's directory — it does not need to live under this repo:
 
 ```sh
-cd ~/.claude/skills/slide-build
+cd ~/.claude/skills/slide
 
 # Full pipeline: auto-fix → render → check → prepare review images
 python3 -m gatelib review /path/to/my-deck

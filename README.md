@@ -10,6 +10,8 @@ Personal Claude Code skills.
 - **snakemake** — Snakemake style guide and utilities (`utils.smk`) for bioinformatics/data workflows
 - **ralph-loop** — Reusable lead-agent + subagent orchestration loop pattern; elicits task structure and generates `PROMPT.md`/`SKILL.md` for any iterative multi-step task
 - **officecli** — Create, analyze, and modify Office documents (.docx, .xlsx, .pptx) via the officecli CLI
+- **slide** — Build and review Marp decks: build guide, figure guide, review playbook, rubric, and the `gatelib` render/check CLI
+- **ctx-agent-history-search** — Search local coding-agent history with `ctx` before acting on a task
 
 ## Installation
 

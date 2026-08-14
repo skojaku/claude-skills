@@ -339,6 +339,11 @@ retires `CAP_RATIO` as a constant: derive it per build.
 (The fix for this particular trap is `\usepackage{lmodern}`, and failing the build when
 `pdflatex`'s log contains `not available`.)
 
+Unicode is part of the same rule. The house figure font renders an em dash (—) but not
+U+2192 (→), which comes out as a tofu box — and only the render says so. Prefer words
+("past this line, …") or mathtext arrows over raw arrow codepoints, and re-read the PNG
+after any string change, however cosmetic.
+
 ### Assert that two discs in one figure do not overlap
 
 Every gate in the build measures **one thing at a time** — this disc's size, that label's
@@ -379,6 +384,38 @@ A canvas-edge check catches ink *touching* the border and says nothing about ink
 beyond it, which simply never renders. One deck lost an axis title placed at `y = -2` that
 way. Assert the coordinates, not the pixels: the generator wrote those numbers, so check
 `0 <= x <= w` and `0 <= y <= h` for every one of them.
+
+### A legend outside the axes is ink outside the canvas
+
+The deck's figures save at a fixed canvas (no `bbox_inches='tight'`, see "The figure and
+the deck must agree on the container"), so a legend placed beside or below the axes clips
+at the canvas edge without any error. One review round found five figures clipping at
+once: two legends lost their bottom entries (the top curve of one plot had no key at all),
+one lost its right column mid-word, and two clipped row labels at the left edge. After
+every regeneration, open the PNG and check that **every plotted series has a visible,
+unclipped legend entry** — a legend that lists 7 of 10 series passes every automated gate
+and fails the room. Budget the axes rectangle for the legend explicitly
+(`subplots_adjust`), and re-measure whenever an entry's text grows: "faded = not the
+series' best condition" fit until it didn't.
+
+### More than ~14 labelled rows cannot fit the 10 × 4.3 in canvas
+
+At the house tick size a row label needs ~30 px of slide height; the canvas has ~420 px of
+axes. A 16-row pairwise comparison ("cross: author -> reviewer", 46 chars, ragged) was
+unreadable at every font size tried — shrinking the labels to fit made them illegible, and
+keeping them legible made them overlap. The fix was never typographic: re-encode. Group by
+one factor as columns (four authors), encode the second factor as marker colour (four
+reviewers), and draw the shared reference (the author's own rate) as a line per column.
+Same data, 4 labels instead of 16, and the left-to-right change becomes the finding.
+
+### Highlight the winner by fading the rest
+
+When a figure compares several conditions per series and the slide's question is "which
+one wins", keep only each series' best condition at full colour and blend every other
+point toward white (`vizstyle.fade`, ~0.68 toward white keeps the hue recognisable). The
+eye lands on the answer without a second encoding channel. Two rules make it honest: the
+fade must be named in the legend ("faded = not the best condition"), and when the x axis
+is blocks that answer different questions, pick a winner per block, not per row.
 
 ### accent-3 is for fills and rings — never text, never a thin stroke
 

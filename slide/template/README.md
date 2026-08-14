@@ -10,7 +10,7 @@
     review/               rendered slide.NNN.png, DECK_SPEC.md, FIXES_Rn.md, CHECKPOINT.md
 
 The theme (`theme.css`) and the QA pipeline (`gatelib`) are not copied into
-this directory — they live once in `~/.claude/skills/slide-build/` and every
+this directory — they live once in `~/.claude/skills/slide/` and every
 deck points at them.
 
 ## Build
@@ -18,15 +18,15 @@ deck points at them.
 ```sh
 npm i -g @marp-team/marp-cli   # once
 
-marp deck.md --theme ~/.claude/skills/slide-build/theme.css \
+marp deck.md --theme ~/.claude/skills/slide/theme.css \
      --allow-local-files --html --no-stdin -o deck.html
-marp deck.md --theme ~/.claude/skills/slide-build/theme.css \
+marp deck.md --theme ~/.claude/skills/slide/theme.css \
      --allow-local-files --html --no-stdin --pdf
 ```
 
 Or in VS Code with the Marp extension, add to `settings.json`:
 
-    "markdown.marp.themes": ["~/.claude/skills/slide-build/theme.css"]
+    "markdown.marp.themes": ["~/.claude/skills/slide/theme.css"]
 
 Math is KaTeX (`math: katex` in the front matter), so `$...$` and `$$...$$` work as written.
 
@@ -35,14 +35,14 @@ Math is KaTeX (`math: katex` in the front matter), so `$...$` and `$$...$$` work
 Run from the skill directory, pointing at this deck's directory:
 
 ```sh
-cd ~/.claude/skills/slide-build
+cd ~/.claude/skills/slide
 python3 -m gatelib review /path/to/this-deck-directory
 ```
 
 This renders the deck, runs every automated check (source + pixel-level),
 auto-fixes what's mechanical, and prepares downscaled review images. See
 `DECK_BUILD_GUIDE.md` and `FIGURE_GUIDE.md` for what "good" means and how to
-draw figures that pass the gate; see the `slide-review` skill for the review
+draw figures that pass the gate; see `REVIEW_PLAYBOOK.md` for the review
 loop itself.
 
 ## Design tokens (from the bundled default theme)

@@ -49,6 +49,24 @@ def find_deck(module_dir):
     return candidates[0]
 
 
+def marp_render_cmd(deck_path, module_dir, out_pattern):
+    """Build the marp CLI invocation, registering module_dir's theme.css if present.
+
+    Without --theme-set, marp-cli silently falls back to its built-in default
+    theme when a deck's `theme:` front matter names a theme it hasn't been told
+    to load -- every theme.css rule (colours, fonts, custom layout blocks like
+    .band/.steps-list) then goes missing with no error.
+    """
+    # --no-stdin: without it marp waits on stdin forever when not attached to a
+    # terminal, which looks exactly like a slow render (REVIEW_PLAYBOOK.md).
+    cmd = ["marp", deck_path, "--images", "png", "-o", out_pattern,
+           "--allow-local-files", "--no-stdin"]
+    theme_css = os.path.join(module_dir, "theme.css")
+    if os.path.isfile(theme_css):
+        cmd += ["--theme-set", theme_css]
+    return cmd
+
+
 def find_module_dir(path="."):
     """Resolve to a module directory containing a deck."""
     path = os.path.abspath(path)
@@ -201,7 +219,7 @@ def cmd_render(module_dir, args):
     out_pattern = os.path.join(review_dir, "slide.png")
     print(f"rendering {deck}...")
     r = subprocess.run(
-        ["marp", deck_path, "--images", "png", "-o", out_pattern, "--allow-local-files"],
+        marp_render_cmd(deck_path, module_dir, out_pattern),
         capture_output=True, text=True
     )
     if r.returncode != 0:
@@ -225,7 +243,7 @@ def cmd_review(module_dir, args):
     os.makedirs(review_dir, exist_ok=True)
     out_pattern = os.path.join(review_dir, "slide.png")
     r = subprocess.run(
-        ["marp", deck_path, "--images", "png", "-o", out_pattern, "--allow-local-files"],
+        marp_render_cmd(deck_path, module_dir, out_pattern),
         capture_output=True, text=True
     )
     if r.returncode != 0:

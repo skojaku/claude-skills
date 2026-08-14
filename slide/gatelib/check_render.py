@@ -10,7 +10,7 @@ Usage from a deck directory:
 
     # check_render.py (per deck, thin)
     import sys, os
-    sys.path.insert(0, os.path.expanduser("~/.claude/skills/slide-build"))
+    sys.path.insert(0, os.path.expanduser("~/.claude/skills/slide"))
     from gatelib.check_render import run
     run(deck="<slug>.md", fig_h={...}, exempt_figures=[...])
 

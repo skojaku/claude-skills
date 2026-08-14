@@ -28,4 +28,4 @@ Critics + simplifier: Opus. Style critic: Haiku. Post-review edits (scientific-w
 
 ## Reporting
 
-Japanese. Per stage: findings by severity with L2's recommendation; `needs-decision` issues as explicit questions. Never translate the document's own prose.
+Per stage: findings by severity with L2's recommendation; `needs-decision` issues as explicit questions. Never translate the document's own prose.
