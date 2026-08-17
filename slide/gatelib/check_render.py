@@ -277,7 +277,8 @@ def slides_with_figures(deck, fig_h=None):
 # ── Main entry point ────────────────────────────────────────────────────────
 
 def run(deck, node_fills=None, fig_h=None, exempt_figures=None,
-        col_w=COL_W, full_img_w=FULL_IMG_W, content_bottom=CONTENT_BOTTOM):
+        col_w=COL_W, full_img_w=FULL_IMG_W, content_bottom=CONTENT_BOTTOM,
+        colour_words=None):
     """Run all render checks. Call from per-module check_render.py.
 
     Args:
@@ -290,6 +291,9 @@ def run(deck, node_fills=None, fig_h=None, exempt_figures=None,
         exempt_figures: filenames to skip (historical photos, etc.)
         col_w: column container width in px
         full_img_w: full-width image cap in px
+        colour_words: {word: (R,G,B)} a figcaption may name. Pass the deck's own
+            palette; the default is the pre-2026-08 blue/red/gold one that the
+            not-yet-restyled modules still draw with.
     """
     if node_fills is None:
         node_fills = []
@@ -312,7 +316,7 @@ def run(deck, node_fills=None, fig_h=None, exempt_figures=None,
     for kind, snippet in figcaption_math(deck):
         fails.append(f"deck: math inside a {kind} — KaTeX will print it literally: {snippet!r}")
 
-    for slide_n, word, fig_src in caption_colours(deck):
+    for slide_n, word, fig_src in caption_colours(deck, colour_words):
         fails.append(
             f"slide {slide_n:03d}: figcaption names \"{word}\" but "
             f"{fig_src} has fewer than 200 pixels of it — stale caption?"
