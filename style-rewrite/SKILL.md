@@ -78,6 +78,47 @@ Other body fields: `review` (default `true` — set `false` to skip stage 3), `m
 `outline_temperature` and `review_temperature` (default 0.2), `style_model`, `outline_model`,
 `review_model`.
 
+## The contract fields, which are what actually hold
+
+`instructions` steers a language model, so it holds most of the time. These four fields are
+checked in **code** after stage 3, and a failure buys another repair pass:
+
+```json
+{"text": "...",
+ "mode": "imperative",
+ "max_sentences": 2,
+ "protect_regex": ["`[^`\\n]+`", "https?://\\S+"],
+ "glossary": [{"term": "Königsberg"}, {"term": "node", "instead_of": ["vertex"]}]}
+```
+
+- **`mode`** — `prose` (default) | `bullet` | `imperative` | `question` | `caption` |
+  `fragment`. Sets a default sentence ceiling (prose ∞, bullet/imperative 2, caption 3,
+  question/fragment 1), tells the reviewer what shape it is looking at, and turns on the
+  matching check. **Use it on every list item and every question** — untagged, they come back
+  as "We will…" or with the answer appended.
+- **`max_sentences`** — a hard ceiling, overriding the mode's default. Overflow that survives
+  the repair pass is cut at a sentence boundary, with the dropped text quoted back in
+  `contract.violations`.
+- **`protect` / `protect_regex`** — literals and regex matches swapped for markers before
+  stage 1 and restored after stage 3, the way display math already is. Anything you cannot
+  afford to lose and is not math goes here: code spans, URLs, Quarto shortcodes, citation
+  keys. Losing one is a blocking violation, so it can no longer ship silently.
+- **`glossary`** — `{"term": ..., "instead_of": [...], "required": bool}`, or a bare string
+  for just the term. The spelling check folds case and diacritics, so it catches
+  `Königsberg` → `Konigsberg`; `instead_of` catches a near-synonym the source never used.
+
+The response gains a `contract` object: `{mode, max_sentences, sentences, protected, repairs,
+violations, satisfied}`. **Read `satisfied` before `review.verdict`** — the reviewer's verdict
+is noisy, and `reject` with `satisfied: true` is usually fine.
+
+Two violations are fixed mechanically when the repair pass fails: overflow is truncated, and
+`imperative` narration is de-narrated ("We will store…" → "Store…"). Both are recorded in
+`violations` with what was changed — nothing is edited silently — so read them and check the
+result rather than trusting the flag.
+
+`POST /check` runs the whole contract with no model in the loop. Use it to test a rule, or to
+re-check text you edited by hand.
+
 ## Mathematics
 
 - **Display math** (`$$ $$`, `\[ \]`, `align` / `equation` / `gather` / `subequations` …)
@@ -99,12 +140,15 @@ table and it will be prose too.
 So:
 
 - **Send prose to the server; keep structure out of it.** Tables, headings and citation
-  strings should never be in the payload. Substitute a placeholder for anything that must
-  survive byte-for-byte and is not math (Quarto shortcodes like `{{< var x >}}`, URLs,
-  reference lists), and put it back afterwards.
+  strings should never be in the payload. Anything that must survive byte-for-byte and is not
+  math — Quarto shortcodes like `{{< var x >}}`, URLs, code spans, reference lists — goes in
+  `protect` or `protect_regex`, not into a placeholder you invent yourself. A placeholder the
+  server does not know about gets flattened into prose ("[[CODE_1]]" comes back as "Code 1")
+  and nothing warns you.
 - **Send list items one at a time** if the output must stay a list. One call per bullet
-  returns one line per bullet. Say so in `instructions` as well — a bare fragment invites the
-  style model to expand it into a paragraph, and the scale check needs to know the target.
+  returns one line per bullet. Set `mode` to `bullet` or `imperative` as well — a bare
+  fragment invites the style model to expand it into a paragraph or to narrate it, and the
+  mode is what stops both.
 - Feed long documents one section at a time. The server splits at 6000 characters, but
   section-sized inputs read better.
 
