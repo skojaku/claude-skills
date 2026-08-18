@@ -1,16 +1,21 @@
 ---
 name: style-rewrite
-description: Rewrite a passage into the user's own writing style by calling the local style-server API (http://127.0.0.1:8823). English or Japanese goes in, English prose in the user's voice comes out, with every LaTeX expression preserved byte for byte. Use when asked to put text "in my style" / 「自分のスタイルで」, to turn Japanese notes or bullets into English prose, or to restyle an existing draft. It changes voice only — structure and argument belong to the scientific-writing skill.
+description: Rewrite a passage into the user's own writing style by calling the local style-server API (http://127.0.0.1:8823). English or Japanese goes in, English prose in the user's voice comes out, checked by a reviewer you can give instructions to, with every LaTeX expression preserved byte for byte. Use when asked to put text "in my style" / 「自分のスタイルで」, to turn Japanese notes or bullets into English prose, or to restyle an existing draft. It changes voice only — structure and argument belong to the scientific-writing skill.
 ---
 
 # style-rewrite
 
-A local server that runs the user's fine-tuned style model. It always works in two stages:
+A local server that runs the user's fine-tuned style model, in three stages:
 
-1. the input is broken into a Japanese outline (`deepseek-v4-flash:cloud`), with display equations pulled out;
-2. the outline goes to the user's fine-tuned model (`my-style-model`, thinking off), which writes English prose.
+1. **Outline** — the input is broken into a Japanese outline (`deepseek-v4-flash:cloud`), with
+   display equations pulled out;
+2. **Style** — the outline goes to the user's fine-tuned model (`my-style-model`, thinking
+   off), which writes English prose;
+3. **Review** — `deepseek-v4-flash:cloud` reads the source and the styled draft together and
+   repairs the draft. This is the stage you can give instructions to.
 
-Roughly 5 s for a paragraph. Everything runs on the user's machine except stage 1.
+Roughly 20-35 s for a paragraph with review on, 5 s with it off. Everything runs on the
+user's machine except stages 1 and 3.
 
 ## When to use it
 
@@ -31,33 +36,102 @@ python3 -c 'import json,sys; print(json.dumps({"text": sys.stdin.read()}))' < dr
 print("WARNINGS:", r["warnings"], file=sys.stderr) if r["warnings"] else None'
 ```
 
-Response fields: `styled` (the prose), `outline` (the intermediate Japanese bullets),
-`warnings`, `timing`. Other endpoints: `POST /outline` (stage 1 only, when you want to
-inspect or hand-edit the bullets), `POST /rewrite/stream` (SSE), `GET /health`.
+Response fields: `styled` (the final prose), `draft` (stage 2, before the reviewer touched
+it — diff the two to see what was repaired), `review` (`{verdict, issues, model}`),
+`attempts`, `outline` (the intermediate Japanese bullets), `warnings`, `timing`.
 
-Optional body fields: `style_temperature` (default 0.7 — lower it for a literal rewrite),
-`outline_temperature` (default 0.2), `style_model`, `outline_model`.
+`review.verdict` is `pass` (draft needed nothing), `repaired` (the reviewer fixed it and
+`issues` says what was wrong), `reject` (too broken to repair — stage 2 was re-run), or
+`unparsed` (the reviewer's JSON was unreadable; the draft shipped unchecked).
+
+Endpoints: `POST /rewrite`, `POST /outline` (stage 1 only), `POST /review` (stage 3 only, to
+re-check an existing draft under new instructions without regenerating it),
+`POST /rewrite/stream` (SSE — the deltas are the *draft*; the reviewed text arrives in
+`done`), `GET /health`.
+
+## Steering it with `instructions`
+
+`instructions` is a free-text field that goes to the **reviewer**, not to the style model:
+
+```json
+{"text": "...",
+ "instructions": "This is one bullet in a topic list. Return one line, at most one sentence. Do not define the concept or list applications. Address the reader as 'you'."}
+```
+
+The style model is a LoRA trained on one exact prompt. Adding instructions to it costs the
+voice you are calling it for, so the pipeline never does. Everything you want enforced —
+person, length, register, vocabulary you must keep, house terminology — goes in
+`instructions`, and the reviewer applies it to the draft afterwards.
+
+The reviewer checks six things by default, in order: faithfulness (no invented claims,
+numbers, or citations), agency (who does what — it catches "we"/"I" displacing "you"),
+terminology (no paraphrasing a term of art), scale (a one-line item stays one line), sense
+(no truncated sentences or word salad), and notation. Your instructions win where they
+conflict.
+
+Two repairs are rejected in code, not by the model: one that drops notation the draft had
+right, and one that hands the source back instead of editing the draft. Both fall back to the
+draft, and the second re-runs stage 2.
+
+Other body fields: `review` (default `true` — set `false` to skip stage 3), `max_attempts`
+(default 2), `style_temperature` (default 0.7 — lower it for a literal rewrite),
+`outline_temperature` and `review_temperature` (default 0.2), `style_model`, `outline_model`,
+`review_model`.
 
 ## Mathematics
 
 - **Display math** (`$$ $$`, `\[ \]`, `align` / `equation` / `gather` / `subequations` …)
-  never reaches either model. It is swapped for a marker and substituted back verbatim, so
+  never reaches any model. It is swapped for a marker and substituted back verbatim, so
   it is guaranteed byte-identical. It splits the outline rather than being summarised into it.
 - **Inline math** (`$ $`, `\( \)`) rides along inside the bullets and does pass through the
-  style model. The server checks afterwards that every expression survived and reports any
-  loss in `warnings`.
+  style and review models. The server checks afterwards that every expression survived and
+  reports any loss in `warnings`.
 
 **If `warnings` is non-empty, do not ship the output as is.** Re-run, or patch the missing
 notation back by hand against the source.
 
+## Lists, headings and tables
+
+The pipeline outputs prose. Feed it a bulleted list and stage 1 flattens the bullets into
+outline items, and stage 2 writes them out as one paragraph — the list is gone. Feed it a
+table and it will be prose too.
+
+So:
+
+- **Send prose to the server; keep structure out of it.** Tables, headings and citation
+  strings should never be in the payload. Substitute a placeholder for anything that must
+  survive byte-for-byte and is not math (Quarto shortcodes like `{{< var x >}}`, URLs,
+  reference lists), and put it back afterwards.
+- **Send list items one at a time** if the output must stay a list. One call per bullet
+  returns one line per bullet. Say so in `instructions` as well — a bare fragment invites the
+  style model to expand it into a paragraph, and the scale check needs to know the target.
+- Feed long documents one section at a time. The server splits at 6000 characters, but
+  section-sized inputs read better.
+
+## Controlling sentence shape
+
+Stage 1 normalises the input into plain Japanese statements, so anything carried by the
+*shape* of the source — a verbless opening, a deliberately clipped fragment — is gone before
+the style model sees it. Turning the temperature up does not bring it back; it only shuffles
+vocabulary.
+
+If you need control over the sentence shape, write the Japanese outline yourself and post it
+as `text`. Stage 1 will pass your bullets through nearly unchanged, and stage 2 will follow
+their rhythm. `POST /outline` shows you what the automatic version looks like first.
+
 ## Reviewing the output
 
-The style model is a 12B local model. Treat its output as a draft:
+The reviewer is a checker, not a guarantee. You still own the result:
 
-- diff it against the source and restore any claim, number, citation, or hedge it dropped;
-- feed long documents one section at a time — the server splits at 6000 characters, but
-  section-sized inputs read better;
-- if it invents a transition or a claim, delete it rather than arguing with the model.
+- diff `draft` against `styled` and `styled` against the source, and read `review.issues`;
+- if the model invents a transition or a claim the reviewer missed, delete it rather than
+  arguing with the model.
+
+**If you reject the model's wording and keep your own, say so.** The failure mode of this
+skill is quietly restoring your own sentences, changing a word or two, and reporting it as a
+rewrite in the user's voice. The user asked for their model's output, not yours. When you
+override it, name the lines you overrode and why — a wrong fact, a lost term, a broken
+structure — and let them judge.
 
 ## If the server is not answering
 
@@ -69,3 +143,5 @@ tail -50 ~/Library/Logs/style-server.log                      # why it died
 
 It runs as a launchd agent and starts at login. It needs Ollama running (Ollama.app must be
 set to launch at login). Source and setup: `~/models/finetuning/kojaku-style-12b-v5-portable`.
+Prompts are in `style-server/prompts.py`; the reviewer's default checks live in
+`REVIEW_SYSTEM` there.
