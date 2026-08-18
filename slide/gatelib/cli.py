@@ -11,6 +11,7 @@ Usage:
     deckgate prepare <module_dir>         # prepare review images
     deckgate review <module_dir>          # full review pipeline
     deckgate render <module_dir>          # render deck + run checks
+    deckgate hygiene <module_dir>         # writer processes, generator guards
 
 Exit codes:
     0 — all checks pass / fixes applied
@@ -231,8 +232,20 @@ def cmd_render(module_dir, args):
     return cmd_check(module_dir, args)
 
 
+def cmd_hygiene(module_dir, args):
+    """Hygiene checks: writer processes, private helpers, uncalled guards."""
+    from .check_hygiene import run
+    return run(module_dir)
+
+
 def cmd_review(module_dir, args):
-    """Full review pipeline: fix → render → check → prepare images."""
+    """Full review pipeline: hygiene → fix → render → check → prepare images."""
+    print("═══ 0/4 hygiene ═══")
+    hygiene_code = cmd_hygiene(module_dir, args)
+    if hygiene_code != 0:
+        print("hygiene failures — resolve before rendering")
+        return hygiene_code
+
     print("═══ 1/4 auto-fix ═══")
     fix_code = cmd_fix(module_dir, args)
 
@@ -313,9 +326,13 @@ def main():
     p.add_argument("module_dir", nargs="?", default=".")
 
     # review
-    p = sub.add_parser("review", help="full pipeline: fix → render → check → prepare")
+    p = sub.add_parser("review", help="full pipeline: hygiene → fix → render → check → prepare")
     p.add_argument("module_dir", nargs="?", default=".")
     p.add_argument("--dry-run", action="store_true")
+
+    # hygiene
+    p = sub.add_parser("hygiene", help="writer processes, generator guards")
+    p.add_argument("module_dir", nargs="?", default=".")
 
     args = parser.parse_args()
     if not args.command:
@@ -335,6 +352,7 @@ def main():
         "prepare": cmd_prepare,
         "render": cmd_render,
         "review": cmd_review,
+        "hygiene": cmd_hygiene,
     }
     return commands[args.command](module_dir, args)
 
