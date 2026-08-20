@@ -5,17 +5,23 @@ description: Rewrite a passage into the user's own writing style by calling the 
 
 # style-rewrite
 
-A local server that runs the user's fine-tuned style model, in three stages:
+A local server that runs the user's fine-tuned style model:
 
-1. **Outline** — the input is broken into a Japanese outline (`deepseek-v4-flash:cloud`), with
-   display equations pulled out;
-2. **Style** — the outline goes to the user's fine-tuned model (`my-style-model`, thinking
-   off), which writes English prose;
+1. **Prepare** — display equations are pulled out and replaced by markers. No model runs;
+   the prose is passed through exactly as you sent it.
+2. **Style** — the prose goes to the user's fine-tuned model (`my-style-model`, thinking
+   off), which writes it again in their voice.
 3. **Review** — `deepseek-v4-flash:cloud` reads the source and the styled draft together and
    repairs the draft. This is the stage you can give instructions to.
 
-Roughly 20-35 s for a paragraph with review on, 5 s with it off. Everything runs on the
-user's machine except stages 1 and 3.
+There used to be a Japanese-bullet stage in front of the style model. It was removed: it
+caused four of six documented failures (`300万` read back as "300 million", cross-paragraph
+references losing their referent), and the current model is trained on English prose in and
+styled prose out, so bullets were off-distribution input. See
+`skojaku/style-finetune#2` and the server's own README.
+
+Roughly 5-15 s for a paragraph with review on, 3 s with it off. Everything runs on the
+user's machine except stage 3.
 
 ## When to use it
 
@@ -38,13 +44,13 @@ print("WARNINGS:", r["warnings"], file=sys.stderr) if r["warnings"] else None'
 
 Response fields: `styled` (the final prose), `draft` (stage 2, before the reviewer touched
 it — diff the two to see what was repaired), `review` (`{verdict, issues, model}`),
-`attempts`, `outline` (the intermediate Japanese bullets), `warnings`, `timing`.
+`attempts`, `prepared` (what stage 2 was given), `contract`, `warnings`, `timing`.
 
 `review.verdict` is `pass` (draft needed nothing), `repaired` (the reviewer fixed it and
 `issues` says what was wrong), `reject` (too broken to repair — stage 2 was re-run), or
 `unparsed` (the reviewer's JSON was unreadable; the draft shipped unchecked).
 
-Endpoints: `POST /rewrite`, `POST /outline` (stage 1 only), `POST /review` (stage 3 only, to
+Endpoints: `POST /rewrite`, `POST /prepare` (segmentation only, no model call), `POST /review` (stage 3 only, to
 re-check an existing draft under new instructions without regenerating it),
 `POST /rewrite/stream` (SSE — the deltas are the *draft*; the reviewed text arrives in
 `done`), `GET /health`.
@@ -75,7 +81,7 @@ draft, and the second re-runs stage 2.
 
 Other body fields: `review` (default `true` — set `false` to skip stage 3), `max_attempts`
 (default 2), `style_temperature` (default 0.7 — lower it for a literal rewrite),
-`outline_temperature` and `review_temperature` (default 0.2), `style_model`, `outline_model`,
+`review_temperature` (default 0.2), `style_model`, `review_model`,
 `review_model`.
 
 ## The contract fields, which are what actually hold
@@ -100,7 +106,7 @@ checked in **code** after stage 3, and a failure buys another repair pass:
   the repair pass is cut at a sentence boundary, with the dropped text quoted back in
   `contract.violations`.
 - **`protect` / `protect_regex`** — literals and regex matches swapped for markers before
-  stage 1 and restored after stage 3, the way display math already is. Anything you cannot
+  the style model and restored after the review stage, the way display math already is. Anything you cannot
   afford to lose and is not math goes here: code spans, URLs, Quarto shortcodes, citation
   keys. Losing one is a blocking violation, so it can no longer ship silently.
 - **`glossary`** — `{"term": ..., "instead_of": [...], "required": bool}`, or a bare string
@@ -123,8 +129,9 @@ re-check text you edited by hand.
 
 - **Display math** (`$$ $$`, `\[ \]`, `align` / `equation` / `gather` / `subequations` …)
   never reaches any model. It is swapped for a marker and substituted back verbatim, so
-  it is guaranteed byte-identical. It splits the outline rather than being summarised into it.
-- **Inline math** (`$ $`, `\( \)`) rides along inside the bullets and does pass through the
+  it is guaranteed byte-identical. It is given a chunk of its own, so in the usual case the
+  style model is never even shown the marker.
+- **Inline math** (`$ $`, `\( \)`) stays in the prose and does pass through the
   style and review models. The server checks afterwards that every expression survived and
   reports any loss in `warnings`.
 
@@ -133,9 +140,8 @@ notation back by hand against the source.
 
 ## Lists, headings and tables
 
-The pipeline outputs prose. Feed it a bulleted list and stage 1 flattens the bullets into
-outline items, and stage 2 writes them out as one paragraph — the list is gone. Feed it a
-table and it will be prose too.
+The pipeline outputs prose. Feed it a bulleted list and the style model writes it out as
+one paragraph — the list is gone. Feed it a table and it will be prose too.
 
 So:
 
@@ -154,14 +160,24 @@ So:
 
 ## Controlling sentence shape
 
-Stage 1 normalises the input into plain Japanese statements, so anything carried by the
-*shape* of the source — a verbless opening, a deliberately clipped fragment — is gone before
-the style model sees it. Turning the temperature up does not bring it back; it only shuffles
-vocabulary.
+The style model now sees your sentences, not a normalised gloss of them, so the shape of the
+source does carry — a verbless opening or a clipped fragment reaches the model intact. What
+it does with them is still its own choice, and `mode` is the lever: `fragment` and `bullet`
+stop it expanding a fragment into a paragraph.
 
-If you need control over the sentence shape, write the Japanese outline yourself and post it
-as `text`. Stage 1 will pass your bullets through nearly unchanged, and stage 2 will follow
-their rhythm. `POST /outline` shows you what the automatic version looks like first.
+`POST /prepare` shows exactly what stage 2 will be given, and how it will be chunked, without
+spending a model call.
+
+## Grammatical person
+
+The style model's most common single semantic error is writing an impersonal source in the
+first person — measured at 23% of impersonal English passages. The server checks this in code
+after the review stage and reports it as a `person` violation in `contract.violations`.
+
+**Check `contract.satisfied` before shipping.** A `false` there means the pipeline found
+something it could not repair; the text still comes back, and the violation names what is
+wrong with it. The check only sees presence and absence, so an `I` swapped for a `we` is the
+reviewer's job, not the contract's — read `review.issues` too.
 
 ## Reviewing the output
 
