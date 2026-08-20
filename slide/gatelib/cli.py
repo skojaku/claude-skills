@@ -60,8 +60,12 @@ def marp_render_cmd(deck_path, module_dir, out_pattern):
     """
     # --no-stdin: without it marp waits on stdin forever when not attached to a
     # terminal, which looks exactly like a slow render (REVIEW_PLAYBOOK.md).
+    # --html: a deck's raw HTML (cols, figures, live widgets) is escaped into a
+    # wall of source text without it, so the PNG stops being the slide the talk
+    # is given from -- and the render checks then fire on the escaped text
+    # rather than on the layout (DECK_BUILD_GUIDE.md).
     cmd = ["marp", deck_path, "--images", "png", "-o", out_pattern,
-           "--allow-local-files", "--no-stdin"]
+           "--allow-local-files", "--html", "--no-stdin"]
     theme_css = os.path.join(module_dir, "theme.css")
     if os.path.isfile(theme_css):
         cmd += ["--theme-set", theme_css]
