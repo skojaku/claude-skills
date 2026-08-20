@@ -1,6 +1,6 @@
 ---
 name: slide
-description: Build or review a Marp slide deck for a lecture, technical talk, or workshop. Use when the user asks to create, update, or fix a slide deck, or to review, check, or QA one.
+description: Build, review, or tighten a Marp slide deck for a lecture, technical talk, or workshop. Use when the user asks to create, update, or fix a slide deck; to review, check, or QA one; or to cut its filler/padding once it is finished.
 ---
 
 # Slide
@@ -14,8 +14,22 @@ One skill, two modes, sharing the same bundled infra (`theme.css`, `gatelib/`,
   Read `DECK_BUILD_GUIDE.md` and `FIGURE_GUIDE.md`.
 - **Review** — user says review/check/QA/audit a deck (or asks "is this deck good").
   Read `REVIEW_PLAYBOOK.md` and `SLIDE_RUBRIC.md`.
-- Both — a build session always ends in the tiered review loop; read all four guides.
+- **Filler pass** — user says tighten / cut the padding / remove the filler / 埋め草を消す.
+  Read `FILLER_PASS.md` and do only what it says: delete, never rewrite.
+- Both — a build session always ends in the tiered review loop; read all four core guides.
 - Ambiguous ("work on this deck")? Ask which mode, don't guess.
+
+## Two stages, in this order
+
+Writing a deck and tightening it are separate jobs, and interleaving them costs content:
+mid-draft you cannot tell padding from load-bearing text, so cutting early cuts both.
+
+1. **Build** to the spec, then gate, then the tiered review loop, until it is ship-ready.
+2. **Then the filler pass** — one top-to-bottom sweep that only deletes, per
+   `FILLER_PASS.md`, followed by a re-render and a re-gate.
+
+Never start stage 2 on a deck that is still growing, and never fold stage 2's cutting
+instinct into stage 1's drafting.
 
 ## Which deck directory
 
