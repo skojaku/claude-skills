@@ -15,7 +15,7 @@ The user writes feedback in English (often dictated, in speaking order, sometime
 4. **Round trip** (below): `roundtrip.py run`, review, `roundtrip.py apply`. Skip only if the user says so.
 5. **Annotate**: `uv run --script ~/.claude/skills/annotate-student-pdf/annotate.py comments.final.json`. It needs no setup (dependencies are inline). Fix every NOT FOUND / AMBIGUOUS quote; never place by guess.
 6. **Verify.** All comments placed; render a page or two to PNG and look at them; `qpdf --check` the output; the original must still have no annotations and be unchanged.
-7. **Report in Japanese**: output path; each final comment (English); what the round trip got wrong and how it was fixed; judgment calls (anchor choices, dropped points, any wording added beyond the user's own); what was verified and what was not (popup display in the user's viewer, PDF Expert, cannot be checked from here).
+7. **Report in Japanese, and show the comments in the chat.** Print every final comment in full, in English as the student will read it, each under a heading with its page and a short excerpt of the highlighted text. Never replace them with a summary, a count, or only the output path: popup comments cannot be read without opening the PDF in a viewer, and the user needs to read the exact wording to veto it. Then give: the output path; what the round trip got wrong and how it was fixed; judgment calls (anchor choices, dropped points, any wording added beyond the user's own); what was verified and what was not (popup display in the user's viewer, PDF Expert, cannot be checked from here).
 
 ## Tone rule
 
