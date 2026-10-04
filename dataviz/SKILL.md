@@ -1,6 +1,6 @@
 ---
 name: dataviz
-description: Use this skill whenever you are about to create ANY chart, graph, plot, dashboard, or data visualization, in ANY output medium — an HTML or React artifact, inline SVG, plotting code in any library (matplotlib, plotly, d3, Recharts, …), an image/PNG you will render and upload, a figure for a paper or slide deck, or a chart shared into Slack. Read it BEFORE writing the first line of chart code, choosing chart colors, building a stat tile / meter / KPI row, or laying out a dashboard. Triggers on "chart", "graph", "plot", "figure", "data viz", "visualization", "dashboard", "analytics", "visualize data", "categorical colors", "sequential / diverging palette", "stat tile", "sparkline", "heatmap", "legend", "axis", "tooltip", "chart colors", "color by series".
+description: 'Use BEFORE creating any chart, graph, plot, dashboard or data visualization in any medium (HTML/React artifact, SVG, plotting code in any library, rendered image, paper or slide figure, Slack chart): before writing chart code, choosing chart colors, building a stat tile / meter / KPI row, or laying out a dashboard. Triggers: chart, graph, plot, figure, data viz, visualization, dashboard, analytics, categorical/sequential/diverging palette, color by series, stat tile, sparkline, heatmap, legend, axis, tooltip.'
 ---
 
 # Data Visualization

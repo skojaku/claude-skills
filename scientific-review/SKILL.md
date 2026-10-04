@@ -1,6 +1,6 @@
 ---
 name: scientific-review
-description: Hierarchical review of scientific documents (papers, grant proposals) without editing them. Layer 1 spawns naive skim and adversarial critics that file findings as GitHub issues; Layer 2 triages each finding simplification-first (cut before patch). Runs coarse to fine — document skeleton, sections, paragraphs — locking user decisions between stages, then a sentence-level style check. Use for any review or critique request on paper or proposal prose. For writing, rewriting, or wording edits, use the scientific-writing skill instead.
+description: 'Hierarchical review of papers and grant proposals, without editing them. Layer 1: naive-skim and adversarial critics file findings as GitHub issues. Layer 2: triage each finding simplification-first (cut before patch). Runs coarse to fine (skeleton, sections, paragraphs), locking user decisions between stages, then a sentence-level style check. Use for any review or critique of paper or proposal prose; for writing or rewording use scientific-writing.'
 ---
 
 # Scientific Review

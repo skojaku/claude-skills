@@ -1,6 +1,6 @@
 ---
 name: annotate-student-pdf
-description: Put the user's own feedback on a student's PDF (assignment, project proposal, report) into the file as highlight-linked popup comments, rewriting blunt feedback into motivating wording without dropping the critique, then running every comment through the Alfred round-trip translation (EN→JA→EN) and surgically repairing what the trip broke. Use when the user is reviewing student work and gives feedback to be annotated onto a PDF, e.g. "学生の課題をレビュー", "PDFにアノテーション", "フィードバックをPDFに入れて", or pastes comments for a named student. Also covers suggesting references to add to those comments. Not for generating a critique of a paper yourself (scientific-review), uploading feedback or grades to Brightspace (brightspace), or general PDF edits (pdf).
+description: 'Put the user''s feedback on a student''s PDF (assignment, proposal, report) into the file as highlight-linked popup comments: rewrite blunt feedback into motivating wording without dropping the critique, run every comment through the Alfred round-trip translation (EN→JA→EN), and surgically repair what the trip broke; can also suggest references to add. Use when the user is reviewing student work and gives feedback to annotate onto a PDF, e.g. "学生の課題をレビュー", "PDFにアノテーション", "フィードバックをPDFに入れて", or pastes comments for a named student. Not for critiquing a paper yourself (scientific-review), uploading feedback or grades to Brightspace (brightspace), or general PDF edits (pdf).'
 ---
 
 # Annotate Student PDFs
