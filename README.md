@@ -10,6 +10,7 @@ Personal Claude Code skills.
 - **snakemake** — Snakemake style guide and utilities (`utils.smk`) for bioinformatics/data workflows
 - **officecli** — Create, analyze, and modify Office documents (.docx, .xlsx, .pptx) via the officecli CLI
 - **slide** — Build and review Marp decks: build guide, figure guide, review playbook, rubric, and the `gatelib` render/check CLI
+- **narrated-video** — Make the narrated video of a Remotion deck (a figure types short notes as terminal lines with keyboard sound): start from a topic with no deck, port the video code, write the narration, render and check; the substance is in the adv-net-sci repo guides
 - **ctx-agent-history-search** — Search local coding-agent history with `ctx` before acting on a task
 
 ## Installation
