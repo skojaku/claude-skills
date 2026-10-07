@@ -1,6 +1,6 @@
 ---
 name: narrated-video
-description: Make or change the narrated video of a Remotion deck, for any module or new topic: a small figure lying down types short English notes as terminal lines with mechanical-keyboard sound, the slides' own sentences moved into the chat, a few reactions (worry, shrug). Covers starting from a topic with no deck, porting the video code to another deck, writing the narration, the figure and its Gemini-drawn frames, the typing sound, rendering and checking. Use when the lecturer asks for narration, a video of a deck or a topic, the typing sound or the character.
+description: "Make or change the narrated video of a Remotion deck, for any module or new topic: a small figure lying down types short English notes as terminal lines with mechanical-keyboard sound, the slides' own sentences moved into the chat, a few reactions (worry, shrug). Covers starting from a topic with no deck, porting the video code to another deck, writing the narration, the figure and its Gemini-drawn frames, the typing sound, rendering and checking. Use when the lecturer asks for narration, a video of a deck or a topic, the typing sound or the character."
 ---
 
 # Narrated video
